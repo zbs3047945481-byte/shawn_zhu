@@ -1,1 +1,1 @@
-# shawn_zhu
+This project implements a lightweight, plug-and-play feature distillation module for federated learning, evaluated on FedAvg and FedProx under Non-IID settings, with additional feature distribution analysis to explain its effectiveness.
