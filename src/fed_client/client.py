@@ -24,7 +24,7 @@ class BaseClient():
         self.use_fedfed_plugin = options.get('use_fedfed_plugin', False)
         self.feature_split_module = None
         self.local_optimizer = None
-        self.global_sensitive_feature = None  # set by server before local_train
+        self.global_prototypes = None  # set by server before local_train
         if self.use_fedfed_plugin:
             fd = options.get('fedfed_feature_dim', 512)
             sd = options.get('fedfed_sensitive_dim', 64)
@@ -37,9 +37,13 @@ class BaseClient():
                 lr=options.get('lr', 0.001)
             )
 
+    def set_global_prototypes(self, global_prototypes):
+        """Set global prototypes from server for prototype distillation."""
+        self.global_prototypes = global_prototypes
+
     def set_global_sensitive_feature(self, global_sensitive_feature):
-        """Set global sensitive feature from server (for L_distill). None when plugin off or round 0."""
-        self.global_sensitive_feature = global_sensitive_feature
+        """Backward-compatible alias for the old single-vector distillation target."""
+        self.set_global_prototypes(global_sensitive_feature)
 
     def set_learning_rate(self, learning_rate):
         for group in self.optimizer.param_groups:
@@ -78,6 +82,24 @@ class BaseClient():
             z_s = z_s + noise_sigma * torch.randn_like(z_s, device=z_s.device)
         return z_s
 
+    def _compute_prototype_distill_loss(self, z_s, y):
+        if not self.global_prototypes:
+            return None
+
+        prototype_losses = []
+        for label in y.unique():
+            class_id = int(label.item())
+            if class_id not in self.global_prototypes:
+                continue
+            class_mask = (y == label)
+            local_proto = z_s[class_mask].mean(dim=0, keepdim=True)
+            target_proto = self.global_prototypes[class_id].to(z_s.device).unsqueeze(0)
+            prototype_losses.append(mse_loss(local_proto, target_proto))
+
+        if not prototype_losses:
+            return None
+        return torch.stack(prototype_losses).mean()
+
     def local_update(self, local_dataset, options, ):
         use_plugin = self.use_fedfed_plugin
         optimizer = self.local_optimizer if use_plugin else self.optimizer
@@ -88,7 +110,8 @@ class BaseClient():
             self.feature_split_module.train()
 
         train_loss = train_acc = train_total = 0
-        z_s_list = []  # collect z_s for mean (only when plugin on)
+        prototype_sums = {}
+        prototype_counts = {}
 
         for epoch in range(options['local_epoch']):
             train_loss = train_acc = train_total = 0
@@ -101,17 +124,24 @@ class BaseClient():
                     z_s, z_r = self.feature_split_module(h)
                     loss_cls = criterion(pred, y)
                     loss = loss_cls
-                    if self.global_sensitive_feature is not None:
-                        target = self.global_sensitive_feature.unsqueeze(0).expand(z_s.size(0), -1)
-                        if self.gpu:
-                            target = target.cuda()
-                        loss_distill = mse_loss(z_s, target)
+                    loss_distill = self._compute_prototype_distill_loss(z_s, y)
+                    if loss_distill is not None:
                         lambda_d = options.get('fedfed_lambda_distill', 1.0)
                         loss = loss_cls + lambda_d * loss_distill
                     loss.backward()
                     optimizer.step()
                     with torch.no_grad():
-                        z_s_list.append(z_s.detach())
+                        for label in y.unique():
+                            class_id = int(label.item())
+                            class_mask = (y == label)
+                            class_feature_sum = z_s[class_mask].detach().sum(dim=0)
+                            class_count = int(class_mask.sum().item())
+                            if class_id not in prototype_sums:
+                                prototype_sums[class_id] = class_feature_sum
+                                prototype_counts[class_id] = class_count
+                            else:
+                                prototype_sums[class_id] += class_feature_sum
+                                prototype_counts[class_id] += class_count
                 else:
                     pred = self.model(X)
                     loss = criterion(pred, y)
@@ -131,13 +161,18 @@ class BaseClient():
                        "acc": train_acc / train_total}
 
         aux = None
-        if use_plugin and self.feature_split_module is not None and z_s_list:
+        if use_plugin and self.feature_split_module is not None and prototype_sums:
             with torch.no_grad():
-                z_s_all = torch.cat(z_s_list, dim=0)  # (N, sensitive_dim)
-                z_s_mean = z_s_all.mean(dim=0)  # (sensitive_dim,)
                 clip_norm = options.get('fedfed_clip_norm', 1.0)
                 noise_sigma = options.get('fedfed_noise_sigma', 0.1)
-                z_s_mean = self._clip_and_noise_z_s(z_s_mean.unsqueeze(0), clip_norm, noise_sigma).squeeze(0)
-                aux = {"sensitive_feature": z_s_mean.cpu()}  # upload mean vector only
+                local_prototypes = {}
+                for class_id, feature_sum in prototype_sums.items():
+                    prototype = (feature_sum / prototype_counts[class_id]).unsqueeze(0)
+                    prototype = self._clip_and_noise_z_s(prototype, clip_norm, noise_sigma).squeeze(0)
+                    local_prototypes[class_id] = {
+                        "prototype": prototype.cpu(),
+                        "count": prototype_counts[class_id],
+                    }
+                aux = {"prototypes": local_prototypes}
 
         return local_model_paras, return_dict, aux

@@ -36,8 +36,8 @@ class BaseFederated(object):
                               f'tn{len(self.clients)}'])
         self.metrics = Metrics(options, self.clients, self.name)
         self.latest_global_model = copy.deepcopy(self.get_model_parameters())
-        # FedFed plugin: global sensitive feature (aggregated from clients' aux)
-        self.global_sensitive_feature = None
+        # FedFed plugin: class-wise global prototypes aggregated from clients' aux.
+        self.global_prototypes = None
 
     @staticmethod
     def move_model_to_gpu(model, options):
@@ -106,7 +106,7 @@ class BaseFederated(object):
             client.set_model_parameters(self.latest_global_model)
             client.set_learning_rate(self.optimizer.param_groups[0]['lr'])
             if use_fedfed:
-                client.set_global_sensitive_feature(self.global_sensitive_feature)
+                client.set_global_prototypes(self.global_prototypes)
             update, stat = client.local_train()
             local_model_paras_set.append(update)
             stats.append(stat)
@@ -134,32 +134,36 @@ class BaseFederated(object):
         for var in averaged_paras:
             averaged_paras[var] /= train_data_num
 
-        # FedFed plugin: aggregate aux.sensitive_feature (weighted average)
+        # FedFed plugin: aggregate class-wise prototypes.
         if self.options.get('use_fedfed_plugin', False):
-            self._aggregate_aux_sensitive_feature(local_model_paras_set, train_data_num)
+            self._aggregate_aux_prototypes(local_model_paras_set)
         return averaged_paras
 
-    def _aggregate_aux_sensitive_feature(self, local_model_paras_set, train_data_num):
-        """Aggregate clients' aux.sensitive_feature into global_sensitive_feature (weighted by num_samples)."""
-        import torch
-        weighted_sum = None
-        total_n = 0
+    def _aggregate_aux_prototypes(self, local_model_paras_set):
+        """Aggregate clients' class prototypes into a global prototype bank."""
+        prototype_sums = {}
+        prototype_counts = {}
         for update in local_model_paras_set:
             aux = update.get("aux")
-            if aux is None or "sensitive_feature" not in aux:
+            if aux is None or "prototypes" not in aux:
                 continue
-            z_s = aux["sensitive_feature"]  # tensor (sensitive_dim,)
-            n = update["num_samples"]
-            if weighted_sum is None:
-                weighted_sum = z_s * n
-            else:
-                weighted_sum = weighted_sum + z_s * n
-            total_n += n
-        if weighted_sum is not None and total_n > 0:
-            self.global_sensitive_feature = (weighted_sum / total_n)
-            if self.gpu:
-                self.global_sensitive_feature = self.global_sensitive_feature.cuda()
-        # else keep previous global_sensitive_feature (or None)
+            for class_id, payload in aux["prototypes"].items():
+                prototype = payload["prototype"]
+                count = payload["count"]
+                if class_id not in prototype_sums:
+                    prototype_sums[class_id] = prototype * count
+                    prototype_counts[class_id] = count
+                else:
+                    prototype_sums[class_id] += prototype * count
+                    prototype_counts[class_id] += count
+
+        if not prototype_sums:
+            return
+
+        self.global_prototypes = {}
+        for class_id, weighted_sum in prototype_sums.items():
+            prototype = weighted_sum / prototype_counts[class_id]
+            self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype
 
 
 
@@ -209,6 +213,5 @@ class BaseFederated(object):
                  'loss': test_loss / test_total,
                  'num_samples': test_total,}
         return stats
-
 
 
