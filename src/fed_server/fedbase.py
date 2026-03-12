@@ -7,6 +7,7 @@ from torch.utils.data import DataLoader
 import copy
 from src.utils.metrics import Metrics
 from src.utils.tools import apply_feature_skew, build_client_feature_skews
+from src.plugins import FedFedServerPlugin
 import torch.nn.functional as F
 criterion = F.cross_entropy
 
@@ -36,8 +37,7 @@ class BaseFederated(object):
                               f'tn{len(self.clients)}'])
         self.metrics = Metrics(options, self.clients, self.name)
         self.latest_global_model = copy.deepcopy(self.get_model_parameters())
-        # FedFed plugin: class-wise global prototypes aggregated from clients' aux.
-        self.global_prototypes = None
+        self.server_plugin = FedFedServerPlugin(options, self.gpu) if options.get('use_fedfed_plugin', False) else None
 
     @staticmethod
     def move_model_to_gpu(model, options):
@@ -99,14 +99,13 @@ class BaseFederated(object):
         return all_client
 
     def local_train(self, round_i, select_clients, ):
-        use_fedfed = self.options.get('use_fedfed_plugin', False)
         local_model_paras_set = []
         stats = []
         for i, client in enumerate(select_clients, start=1):
             client.set_model_parameters(self.latest_global_model)
             client.set_learning_rate(self.optimizer.param_groups[0]['lr'])
-            if use_fedfed:
-                client.set_global_prototypes(self.global_prototypes)
+            if self.server_plugin is not None:
+                client.set_plugin_payload(self.server_plugin.get_client_payload())
             update, stat = client.local_train()
             local_model_paras_set.append(update)
             stats.append(stat)
@@ -135,35 +134,9 @@ class BaseFederated(object):
             averaged_paras[var] /= train_data_num
 
         # FedFed plugin: aggregate class-wise prototypes.
-        if self.options.get('use_fedfed_plugin', False):
-            self._aggregate_aux_prototypes(local_model_paras_set)
+        if self.server_plugin is not None:
+            self.server_plugin.aggregate_client_updates(local_model_paras_set)
         return averaged_paras
-
-    def _aggregate_aux_prototypes(self, local_model_paras_set):
-        """Aggregate clients' class prototypes into a global prototype bank."""
-        prototype_sums = {}
-        prototype_counts = {}
-        for update in local_model_paras_set:
-            aux = update.get("aux")
-            if aux is None or "prototypes" not in aux:
-                continue
-            for class_id, payload in aux["prototypes"].items():
-                prototype = payload["prototype"]
-                count = payload["count"]
-                if class_id not in prototype_sums:
-                    prototype_sums[class_id] = prototype * count
-                    prototype_counts[class_id] = count
-                else:
-                    prototype_sums[class_id] += prototype * count
-                    prototype_counts[class_id] += count
-
-        if not prototype_sums:
-            return
-
-        self.global_prototypes = {}
-        for class_id, weighted_sum in prototype_sums.items():
-            prototype = weighted_sum / prototype_counts[class_id]
-            self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype
 
 
 
@@ -213,5 +186,4 @@ class BaseFederated(object):
                  'loss': test_loss / test_total,
                  'num_samples': test_total,}
         return stats
-
 
