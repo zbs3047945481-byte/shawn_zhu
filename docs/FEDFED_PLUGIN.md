@@ -18,7 +18,7 @@
 ## 2. 关键参数
 
 - `--use_fedfed_plugin true|false`
-- `--plugin_name none|fedfed_prototype`
+- `--plugin_name none|fedfed_prototype|fedfed_single_file`
 - `--fedfed_sensitive_dim`
 - `--fedfed_feature_dim`
 - `--fedfed_clip_norm`
@@ -118,7 +118,17 @@ python main.py \
 - 当前为“每类一个 prototype”
 - 尚未升级到“每类多个簇中心”
 
-## 7. 下一步
+## 7. 交付建议
+
+如果是仓库内继续开发，优先使用：
+
+- `fedfed_prototype`
+
+如果是对外复制到其他联邦学习项目，优先使用：
+
+- `fedfed_single_file`
+
+## 8. 下一步
 
 如果继续沿“可插拔模块”路线推进，下一步最合适的是：
 

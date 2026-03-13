@@ -1,11 +1,16 @@
 from src.plugins.base import BaseClientPlugin, BaseServerPlugin
 from src.plugins.fedfed_plugin import FedFedClientPlugin, FedFedServerPlugin
+from src.plugins.fedfed_single_file import FedFedSingleFileClientPlugin, FedFedSingleFileServerPlugin
 
 
 PLUGIN_REGISTRY = {
     'fedfed_prototype': {
         'client': FedFedClientPlugin,
         'server': FedFedServerPlugin,
+    },
+    'fedfed_single_file': {
+        'client': FedFedSingleFileClientPlugin,
+        'server': FedFedSingleFileServerPlugin,
     },
 }
 
@@ -42,6 +47,8 @@ __all__ = [
     'BaseServerPlugin',
     'FedFedClientPlugin',
     'FedFedServerPlugin',
+    'FedFedSingleFileClientPlugin',
+    'FedFedSingleFileServerPlugin',
     'build_client_plugin',
     'build_server_plugin',
     'resolve_plugin_name',
