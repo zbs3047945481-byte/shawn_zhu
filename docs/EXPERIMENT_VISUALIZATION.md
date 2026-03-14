@@ -27,6 +27,7 @@ result/<dataset_name>/<exp_name>/
 项目新增了：
 
 - `plot_experiments.py`
+- `run_experiment_suite.py`
 
 它可以读取多个 `metrics.json`，生成：
 
@@ -48,6 +49,23 @@ python plot_experiments.py \
   --output_dir result/comparisons
 ```
 
+如果你希望批量执行常见实验并自动生成对比图，可以直接使用：
+
+```bash
+python run_experiment_suite.py --suite baseline_vs_plugin
+```
+
+当前内置实验套件包括：
+
+- `baseline_vs_plugin`
+- `alpha_sweep`
+- `lambda_sweep`
+- `dim_sweep`
+- `thesis_main`
+- `thesis_ablation`
+- `thesis_heterogeneity`
+- `thesis_engineering`
+
 ## 3. 适合论文的常见对比组合
 
 你后续可以按这些组合直接出图：
@@ -67,6 +85,7 @@ python plot_experiments.py \
 
 - 多实验对比图：
   - `plot_experiments.py`
+  - `run_experiment_suite.py`
 
 ## 5. 依赖
 
@@ -75,3 +94,11 @@ python plot_experiments.py \
 - `matplotlib`
 
 如果环境中没有安装，训练仍可进行，但图表不会生成。
+
+## 6. 论文实验建议
+
+推荐直接查看：
+
+- `docs/THESIS_EXPERIMENT_PLAN.md`
+
+里面已经把当前内置 suite 和论文实验章节做了对应。

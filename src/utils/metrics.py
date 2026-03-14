@@ -36,7 +36,10 @@ class Metrics(object):
             options['round_num'],
             options['batch_size'],
         )
+        tag = options.get('experiment_tag', '').strip()
         self.exp_name = '{}_{}'.format(options['model_name'], suffix)
+        if tag:
+            self.exp_name = '{}_{}'.format(self.exp_name, tag)
         self.exp_dir = mkdir(os.path.join(self.result_path, self.exp_name))
 
         train_event_folder = mkdir(os.path.join(self.exp_dir, 'train.event'))

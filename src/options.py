@@ -61,6 +61,8 @@ def input_options():
     
     parser.add_argument('--seed', help='seed for randomness;', type=int, default=3001)
     #随机种子：控制数据划分、模型初始化，方便复现实验
+    parser.add_argument('--experiment_tag', type=str, default='',
+                        help='Optional tag appended to experiment output folder names.')
     
     parser.add_argument('--weight_decay', help='weight_decay;', type=int, default=1)
     #权重衰减：防止过拟合

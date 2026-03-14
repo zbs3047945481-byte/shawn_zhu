@@ -51,6 +51,12 @@ python plot_experiments.py \
   --output_dir result/comparisons
 ```
 
+To run a predefined experiment suite and automatically generate comparison charts:
+
+```bash
+python run_experiment_suite.py --suite baseline_vs_plugin
+```
+
 ## Acknowledgement
 This repository needs to thank this paper, i.e, ``Communication-Efficient Learning of Deep Networks from Decentralized Data.''.
 
