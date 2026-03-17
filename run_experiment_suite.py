@@ -47,7 +47,7 @@ SUITES = {
         {'label': 'Prototype_dim_64', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64']},
         {'label': 'Prototype_dim_64_no_noise', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_noise_sigma', '0.0']},
         {'label': 'Prototype_dim_64_low_lambda', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_lambda_distill', '0.1']},
-        {'label': 'SingleFile_dim_64', 'args': ['--plugin_name', 'fedfed_single_file', '--fedfed_sensitive_dim', '64']},
+        {'label': 'Prototype_dim_32', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '32']},
     ],
     'thesis_heterogeneity': [
         {'label': 'label_only', 'args': ['--plugin_name', 'fedfed_prototype', '--enable_quantity_skew', 'false', '--enable_feature_skew', 'false', '--dirichlet_alpha', '0.3']},
@@ -57,8 +57,8 @@ SUITES = {
     ],
     'thesis_engineering': [
         {'label': 'FedAvg', 'args': ['--plugin_name', 'none']},
-        {'label': 'PrototypePlugin', 'args': ['--plugin_name', 'fedfed_prototype']},
-        {'label': 'SingleFilePlugin', 'args': ['--plugin_name', 'fedfed_single_file']},
+        {'label': 'FolderPlugin_default', 'args': ['--plugin_name', 'fedfed_prototype']},
+        {'label': 'FolderPlugin_no_noise', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_noise_sigma', '0.0']},
     ],
 }
 

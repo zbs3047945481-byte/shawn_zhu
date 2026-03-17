@@ -2,20 +2,25 @@
 
 这份文档面向“已有联邦学习项目”的接入，不要求对方使用本仓库的训练骨架。
 
-目标是把当前插件作为一个模块文件插入到现有项目中。
+当前项目统一采用：
 
-## 1. 推荐使用的交付文件
+- **文件夹级插件接入**
 
-如果你要把插件复制到其他项目，优先使用：
+不再提供单文件插件交付路线。
 
-- `src/plugins/fedfed_single_file.py`
+## 1. 推荐复制的文件夹
 
-原因：
+如果你要把插件复制到其他项目，优先复制：
 
-- 这是单文件版本
-- 自带 `FeatureSplitModule`
-- 同时包含客户端插件和服务端插件
-- 依赖最少，便于直接复制
+- `src/plugins/`
+- `src/models/feature_split.py`
+
+其中核心运行所需主要是：
+
+- `src/plugins/base.py`
+- `src/plugins/__init__.py`
+- `src/plugins/fedfed_plugin.py`
+- `src/models/feature_split.py`
 
 ## 2. 外部项目只需要改 3 个接入点
 
@@ -90,7 +95,9 @@ server_plugin.aggregate_client_payloads(local_updates)
 ## 3. 最小客户端伪代码
 
 ```python
-plugin = FedFedSingleFileClientPlugin(options, model, gpu)
+from src.plugins.fedfed_plugin import FedFedClientPlugin
+
+plugin = FedFedClientPlugin(options, model, gpu)
 
 for round_i in range(num_rounds):
     plugin.on_round_start(current_lr, server_payload)
@@ -107,7 +114,9 @@ for round_i in range(num_rounds):
 ## 4. 最小服务端伪代码
 
 ```python
-server_plugin = FedFedSingleFileServerPlugin(options, gpu)
+from src.plugins.fedfed_plugin import FedFedServerPlugin
+
+server_plugin = FedFedServerPlugin(options, gpu)
 
 for round_i in range(num_rounds):
     payload = server_plugin.build_broadcast_payload()
@@ -117,7 +126,7 @@ for round_i in range(num_rounds):
     server_plugin.aggregate_client_payloads(local_updates)
 ```
 
-## 5. 当前单文件插件的前提条件
+## 5. 当前文件夹级插件的前提条件
 
 外部项目至少要满足：
 
@@ -134,16 +143,10 @@ for round_i in range(num_rounds):
 
 不要一上来就同时改所有地方，否则很难排查问题。
 
-## 7. 当前两种插件实现的区别
+## 7. 当前仓库里的推荐插件实现
 
-### `fedfed_prototype`
+当前统一推荐使用：
 
-- 仓库内标准实现
-- 结构更清晰
-- 更适合继续开发
+- `fedfed_prototype`
 
-### `fedfed_single_file`
-
-- 更适合外部复制
-- 更接近最终毕设交付形态
-- 更适合作为“模块文件”演示成果
+它是当前项目的标准实现，也是文件夹级接入模式下的唯一主实现。

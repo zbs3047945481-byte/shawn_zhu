@@ -1,3 +1,5 @@
+#插件协议文件，也就是 client/server plugin 必须实现什么接口的抽象层。它属于“插件规范”。
+
 from abc import ABC, abstractmethod
 
 

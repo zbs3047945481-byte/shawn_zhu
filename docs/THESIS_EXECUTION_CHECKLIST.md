@@ -45,7 +45,7 @@ python run_experiment_suite.py --suite thesis_ablation
 用途：
 
 - 证明你的设计不是“随便加个模块就有效”
-- 重点看 prototype 设计、噪声项、蒸馏权重、单文件版本一致性
+- 重点看 prototype 设计、噪声项、蒸馏权重、不同敏感特征维度配置
 
 论文位置：
 
@@ -54,7 +54,7 @@ python run_experiment_suite.py --suite thesis_ablation
 输出重点：
 
 - 各组件贡献对比图
-- 标准插件 vs 单文件插件一致性结果
+- 不同插件配置的一致性结果
 
 ### 第三优先级
 
@@ -87,8 +87,8 @@ python run_experiment_suite.py --suite thesis_engineering
 
 用途：
 
-- 证明你的实现不仅有效，而且工程形态一致
-- 特别用于支撑“单文件交付版本可用”
+- 证明你的实现不仅有效，而且文件夹级插件接入形态稳定
+- 特别用于支撑“文件夹级插件接入可用”
 
 论文位置：
 
@@ -97,7 +97,7 @@ python run_experiment_suite.py --suite thesis_engineering
 
 输出重点：
 
-- `FedAvg`、标准插件、单文件插件对比结果
+- `FedAvg`、文件夹级插件默认配置、文件夹级插件工程配置对比结果
 
 ### 第五优先级
 
@@ -134,7 +134,7 @@ python run_experiment_suite.py --suite dim_sweep
 ### 第二天
 
 - 跑 `thesis_ablation`
-- 先确保标准插件和单文件插件趋势一致
+- 先确保不同插件配置趋势一致
 
 ### 第三天
 
@@ -167,7 +167,7 @@ python run_experiment_suite.py --suite dim_sweep
 
 - 去掉噪声后性能如何
 - 降低蒸馏权重后性能如何
-- 单文件版本和标准版本是否基本一致
+- 不同敏感特征维度版本是否保持合理趋势
 
 ### `thesis_heterogeneity`
 
@@ -180,7 +180,7 @@ python run_experiment_suite.py --suite dim_sweep
 
 检查：
 
-- 标准插件和单文件插件是否结果接近
+- 文件夹级插件不同工程配置是否结果稳定
 - 是否能支撑“工程可交付”的论点
 
 ### 参数分析

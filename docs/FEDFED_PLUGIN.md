@@ -18,7 +18,7 @@
 ## 2. 关键参数
 
 - `--use_fedfed_plugin true|false`
-- `--plugin_name none|fedfed_prototype|fedfed_single_file`
+- `--plugin_name none|fedfed_prototype`
 - `--fedfed_sensitive_dim`
 - `--fedfed_feature_dim`
 - `--fedfed_clip_norm`
@@ -120,13 +120,11 @@ python main.py \
 
 ## 7. 交付建议
 
-如果是仓库内继续开发，优先使用：
+当前项目统一采用：
 
 - `fedfed_prototype`
 
-如果是对外复制到其他联邦学习项目，优先使用：
-
-- `fedfed_single_file`
+也就是文件夹级插件接入模式。
 
 ## 8. 下一步
 

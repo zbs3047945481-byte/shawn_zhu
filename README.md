@@ -1,48 +1,52 @@
+# Plug-and-Play Feature Distillation for Federated Learning
 
-## 1 Install Enviornment
+This repository implements a lightweight, folder-level plugin for feature distillation in federated learning.
 
-1.1 Create and activate conda virtual environment / 创建 和 激活 conda虚拟环境
-```
-conda create --name (env_name) python=3.10 # example: conda create --name fl python=3.10
-conda activate (env_name) # example: conda activate fl 
-```
+Current focus:
 
-1.2 install pytorch / 安装pytorch
-```
-pip3 install torch torchvision torchaudio #  It is recommended to search for the code on the official pytorch website. / 建议官方寻找代码
-```
-optional:
-This code requires tensorboardX to be installed in order to run
-You can also disable tensorboardX
-```
-pip install tensorboardX
-```
-For experiment visualization, install matplotlib:
-```
-pip install matplotlib
-```
-Besides,
+- `FedAvg`-style federated training baseline
+- `fedfed_prototype` plugin with class-prototype distillation
+- configurable Non-IID simulation
+- experiment plotting and batch experiment suites
 
-2025-03-09 The conda environment is exported as environment.yml
+## Quick Start
 
+Create environment:
 
-## 2 Quick Start
-
-you can enter the code below to run the federated learning demo. 
-
-```
-python main.py
+```bash
+conda env create -f environment.yml
+conda activate t
 ```
 
-After training, the project will automatically save:
+Run a minimal training example:
+
+```bash
+python main.py \
+  --round_num 1 \
+  --num_of_clients 5 \
+  --c_fraction 0.4 \
+  --local_epoch 1 \
+  --batch_size 64 \
+  --gpu false \
+  --dataset_name mnist \
+  --partition_strategy dirichlet \
+  --dirichlet_alpha 0.3 \
+  --enable_quantity_skew true \
+  --enable_feature_skew true \
+  --plugin_name fedfed_prototype
+```
+
+## Outputs
+
+Each experiment writes results under `result/<dataset>/<experiment>/`, including:
 
 - `metrics.json`
 - `test_acc_curve.png`
 - `test_loss_curve.png`
 
-under the corresponding experiment folder in `result/`.
+## Common Commands
 
-To compare multiple experiments visually:
+Compare multiple finished runs:
 
 ```bash
 python plot_experiments.py \
@@ -51,15 +55,48 @@ python plot_experiments.py \
   --output_dir result/comparisons
 ```
 
-To run a predefined experiment suite and automatically generate comparison charts:
+Run a predefined experiment suite:
 
 ```bash
-python run_experiment_suite.py --suite baseline_vs_plugin
+python run_experiment_suite.py --suite thesis_main
 ```
 
-## Acknowledgement
-This repository needs to thank this paper, i.e, ``Communication-Efficient Learning of Deep Networks from Decentralized Data.''.
+## Recommended Reading Order
 
-## Some final words
-en: If this repository has been helpful to you, could you please give it a star? It would be a great honour, and I would very much appreciate it! You are welcome to fork this repository, but please indicate the source in code or others.
+Core usage and integration:
 
+- [Plugin Overview](docs/FEDFED_PLUGIN.md)
+- [External Integration Guide](docs/EXTERNAL_INTEGRATION_GUIDE.md)
+- [Experiment Visualization](docs/EXPERIMENT_VISUALIZATION.md)
+- [Thesis Experiment Plan](docs/THESIS_EXPERIMENT_PLAN.md)
+- [Thesis Execution Checklist](docs/THESIS_EXECUTION_CHECKLIST.md)
+
+Development history:
+
+- [Docs Index](docs/README.md)
+
+## Project Structure
+
+Main entry and orchestration:
+
+- `main.py`
+- `src/fed_server/`
+- `src/fed_client/`
+
+Plugin implementation:
+
+- `src/plugins/fedfed_plugin.py`
+- `src/plugins/base.py`
+- `src/plugins/minimal_template.py`
+
+Model and feature module:
+
+- `src/models/mnist_cnn.py`
+- `src/models/feature_split.py`
+
+Experiment tooling:
+
+- `plot_experiments.py`
+- `run_experiment_suite.py`
+- `src/utils/metrics.py`
+- `src/utils/plotting.py`

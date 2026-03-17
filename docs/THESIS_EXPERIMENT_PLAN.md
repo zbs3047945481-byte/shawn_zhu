@@ -27,7 +27,7 @@ python run_experiment_suite.py --suite thesis_ablation
 
 用途：
 
-- 对比无插件、标准 prototype 插件、去噪版、弱蒸馏版、单文件版
+- 对比无插件、标准 prototype 插件、去噪版、弱蒸馏版、不同敏感特征维度版本
 - 验证各组件作用
 
 建议放在论文：
@@ -57,8 +57,8 @@ python run_experiment_suite.py --suite thesis_engineering
 用途：
 
 - 比较 `FedAvg`
-- 比较标准插件版本
-- 比较单文件交付版本
+- 比较文件夹级插件默认配置
+- 比较文件夹级插件不同工程配置
 
 建议放在论文：
 

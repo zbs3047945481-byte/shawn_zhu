@@ -71,7 +71,6 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 你后续可以按这些组合直接出图：
 
 - `FedAvg` vs `fedfed_prototype`
-- `fedfed_prototype` vs `fedfed_single_file`
 - 不同 `dirichlet_alpha`
 - 不同 `fedfed_lambda_distill`
 - 不同 `fedfed_sensitive_dim`
