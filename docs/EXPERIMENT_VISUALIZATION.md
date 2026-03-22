@@ -61,6 +61,8 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 - `alpha_sweep`
 - `lambda_sweep`
 - `dim_sweep`
+- `reliability_sweep`
+- `reliability_sweep_multiseed`
 - `thesis_main`
 - `thesis_ablation`
 - `thesis_heterogeneity`
@@ -75,6 +77,7 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 - 不同 `fedfed_lambda_distill`
 - 不同 `fedfed_sensitive_dim`
 - 不同 `fedfed_noise_sigma`
+- 不同 prototype reliability 配置
 
 ## 4. 当前可视化相关代码位置
 
@@ -101,3 +104,17 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 - `docs/THESIS_EXPERIMENT_PLAN.md`
 
 里面已经把当前内置 suite 和论文实验章节做了对应。
+
+## 7. 多随机种子汇总
+
+当 `run_experiment_suite.py` 使用：
+
+```bash
+--num_repeats 3
+```
+
+时，每个配置会重复运行多个随机种子，并额外输出：
+
+- `suite_summary_multiseed.csv`
+
+适合直接用于论文中的 `mean ± std` 结果表。

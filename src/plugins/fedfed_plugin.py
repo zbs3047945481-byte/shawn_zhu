@@ -15,6 +15,7 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.model = model
         self.gpu = gpu
         self.global_prototypes = None
+        self.prototype_reliability = None
         self.prototype_sums = {}
         self.prototype_counts = {}
 
@@ -33,6 +34,7 @@ class FedFedClientPlugin(BaseClientPlugin):
         for group in self.optimizer.param_groups:
             group['lr'] = learning_rate
         self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
+        self.prototype_reliability = None if server_payload is None else server_payload.get('prototype_reliability')
         self.feature_split_module.train()
         self.prototype_sums = {}
         self.prototype_counts = {}
@@ -54,18 +56,34 @@ class FedFedClientPlugin(BaseClientPlugin):
             return None
 
         prototype_losses = []
+        prototype_weights = []
         for label in y.unique():
             class_id = int(label.item())
             if class_id not in self.global_prototypes:
+                continue
+            reliability = self._get_class_reliability(class_id)
+            if reliability < self.options.get('fedfed_reliability_min', 0.05):
                 continue
             class_mask = (y == label)
             local_proto = z_s[class_mask].mean(dim=0, keepdim=True)
             target_proto = self.global_prototypes[class_id].to(z_s.device).unsqueeze(0)
             prototype_losses.append(mse_loss(local_proto, target_proto))
+            prototype_weights.append(reliability)
 
         if not prototype_losses:
             return None
-        return torch.stack(prototype_losses).mean()
+        loss_tensor = torch.stack(prototype_losses)
+        weight_tensor = torch.tensor(prototype_weights, dtype=loss_tensor.dtype, device=loss_tensor.device)
+        if weight_tensor.sum() <= 0:
+            return None
+        return (loss_tensor * weight_tensor).sum() / weight_tensor.sum()
+
+    def _get_class_reliability(self, class_id):
+        if not self.options.get('fedfed_enable_reliability_gating', True):
+            return 1.0
+        if not self.prototype_reliability:
+            return 0.0
+        return float(self.prototype_reliability.get(class_id, 0.0))
 
     def train_batch(self, X, y):
         self.optimizer.zero_grad()
@@ -117,15 +135,20 @@ class FedFedServerPlugin(BaseServerPlugin):
         self.options = options
         self.gpu = gpu
         self.global_prototypes = None
+        self.prototype_reliability = None
 
     def build_broadcast_payload(self):
         if self.global_prototypes is None:
             return None
-        return {'global_prototypes': self.global_prototypes}
+        return {
+            'global_prototypes': self.global_prototypes,
+            'prototype_reliability': self.prototype_reliability,
+        }
 
     def aggregate_client_payloads(self, local_model_paras_set):
         prototype_sums = {}
         prototype_counts = {}
+        prototype_client_counts = {}
         for update in local_model_paras_set:
             aux = update.get('aux')
             if aux is None or 'prototypes' not in aux:
@@ -136,14 +159,30 @@ class FedFedServerPlugin(BaseServerPlugin):
                 if class_id not in prototype_sums:
                     prototype_sums[class_id] = prototype * count
                     prototype_counts[class_id] = count
+                    prototype_client_counts[class_id] = 1
                 else:
                     prototype_sums[class_id] += prototype * count
                     prototype_counts[class_id] += count
+                    prototype_client_counts[class_id] += 1
 
         if not prototype_sums:
             return
 
         self.global_prototypes = {}
+        self.prototype_reliability = {}
         for class_id, weighted_sum in prototype_sums.items():
             prototype = weighted_sum / prototype_counts[class_id]
             self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype
+            self.prototype_reliability[class_id] = self._compute_reliability(
+                prototype_counts[class_id],
+                prototype_client_counts[class_id],
+            )
+
+    def _compute_reliability(self, sample_count, client_count):
+        if not self.options.get('fedfed_enable_reliability_gating', True):
+            return 1.0
+        count_tau = max(float(self.options.get('fedfed_reliability_count_tau', 128.0)), 1.0)
+        client_tau = max(float(self.options.get('fedfed_reliability_client_tau', 5.0)), 1.0)
+        count_reliability = min(float(sample_count) / count_tau, 1.0)
+        client_reliability = min(float(client_count) / client_tau, 1.0)
+        return count_reliability * client_reliability

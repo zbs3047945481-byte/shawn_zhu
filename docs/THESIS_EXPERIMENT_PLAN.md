@@ -70,6 +70,8 @@ python run_experiment_suite.py --suite thesis_engineering
 python run_experiment_suite.py --suite lambda_sweep
 python run_experiment_suite.py --suite dim_sweep
 python run_experiment_suite.py --suite alpha_sweep
+python run_experiment_suite.py --suite reliability_sweep
+python run_experiment_suite.py --suite reliability_sweep_multiseed --num_repeats 3
 ```
 
 用途：
@@ -88,6 +90,8 @@ python run_experiment_suite.py --suite alpha_sweep
 - `alpha_sweep`
 - `lambda_sweep`
 - `dim_sweep`
+- `reliability_sweep`
+- `reliability_sweep_multiseed`
 - `thesis_main`
 - `thesis_ablation`
 - `thesis_heterogeneity`

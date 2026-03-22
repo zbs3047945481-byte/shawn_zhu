@@ -107,6 +107,8 @@ python run_experiment_suite.py --suite thesis_engineering
 python run_experiment_suite.py --suite alpha_sweep
 python run_experiment_suite.py --suite lambda_sweep
 python run_experiment_suite.py --suite dim_sweep
+python run_experiment_suite.py --suite reliability_sweep
+python run_experiment_suite.py --suite reliability_sweep_multiseed --num_repeats 3
 ```
 
 用途：
@@ -150,6 +152,8 @@ python run_experiment_suite.py --suite dim_sweep
 
 - 跑 `lambda_sweep`
 - 跑 `dim_sweep`
+- 跑 `reliability_sweep`
+- 跑 `reliability_sweep_multiseed --num_repeats 3`
 - 整理所有 `suite_summary.csv`
 
 ## 3. 每组实验跑完后你要检查什么
@@ -189,6 +193,7 @@ python run_experiment_suite.py --suite dim_sweep
 
 - 是否存在明显过大/过小的无效参数区间
 - 当前默认值是否处于合理位置
+- reliability gating 是否比固定蒸馏更稳
 
 ## 4. 论文图表建议对应关系
 
@@ -210,7 +215,7 @@ python run_experiment_suite.py --suite dim_sweep
 
 ### 图 5
 
-- `alpha_sweep / lambda_sweep / dim_sweep` 中任选 1 到 2 组参数敏感性曲线
+- `alpha_sweep / lambda_sweep / dim_sweep / reliability_sweep` 中任选 1 到 2 组参数敏感性曲线
 
 ### 表 1
 

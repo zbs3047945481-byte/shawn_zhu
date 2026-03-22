@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
+from statistics import mean, pstdev
 
 from plot_experiments import load_experiments
 from src.utils.plotting import plotting_available, save_comparison_plots
@@ -32,6 +33,118 @@ SUITES = {
         {'label': 'dim_64', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64']},
         {'label': 'dim_128', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '128']},
     ],
+    'reliability_sweep': [
+        {
+            'label': 'rel_off',
+            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
+        },
+        {
+            'label': 'rel_default',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '128',
+                '--fedfed_reliability_client_tau', '5',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+        {
+            'label': 'rel_fast_open',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '64',
+                '--fedfed_reliability_client_tau', '2',
+                '--fedfed_reliability_min', '0.01',
+            ],
+        },
+        {
+            'label': 'rel_conservative',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '256',
+                '--fedfed_reliability_client_tau', '8',
+                '--fedfed_reliability_min', '0.10',
+            ],
+        },
+        {
+            'label': 'rel_high_count_only',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '256',
+                '--fedfed_reliability_client_tau', '2',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+        {
+            'label': 'rel_high_coverage_only',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '64',
+                '--fedfed_reliability_client_tau', '8',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+    ],
+    'reliability_sweep_multiseed': [
+        {
+            'label': 'rel_off',
+            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
+        },
+        {
+            'label': 'rel_default',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '128',
+                '--fedfed_reliability_client_tau', '5',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+        {
+            'label': 'rel_fast_open',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '64',
+                '--fedfed_reliability_client_tau', '2',
+                '--fedfed_reliability_min', '0.01',
+            ],
+        },
+        {
+            'label': 'rel_conservative',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '256',
+                '--fedfed_reliability_client_tau', '8',
+                '--fedfed_reliability_min', '0.10',
+            ],
+        },
+        {
+            'label': 'rel_high_count_only',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '256',
+                '--fedfed_reliability_client_tau', '2',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+        {
+            'label': 'rel_high_coverage_only',
+            'args': [
+                '--plugin_name', 'fedfed_prototype',
+                '--fedfed_enable_reliability_gating', 'true',
+                '--fedfed_reliability_count_tau', '64',
+                '--fedfed_reliability_client_tau', '8',
+                '--fedfed_reliability_min', '0.05',
+            ],
+        },
+    ],
     'thesis_main': [
         {'label': 'FedAvg_alpha_1.0', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '1.0']},
         {'label': 'FedFed_alpha_1.0', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '1.0']},
@@ -47,7 +160,10 @@ SUITES = {
         {'label': 'Prototype_dim_64', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64']},
         {'label': 'Prototype_dim_64_no_noise', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_noise_sigma', '0.0']},
         {'label': 'Prototype_dim_64_low_lambda', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_lambda_distill', '0.1']},
-        {'label': 'Prototype_dim_32', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '32']},
+        {
+            'label': 'Prototype_reliability_off',
+            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
+        },
     ],
     'thesis_heterogeneity': [
         {'label': 'label_only', 'args': ['--plugin_name', 'fedfed_prototype', '--enable_quantity_skew', 'false', '--enable_feature_skew', 'false', '--dirichlet_alpha', '0.3']},
@@ -74,6 +190,7 @@ def parse_args():
     parser.add_argument('--gpu', type=str, default='false', help='Whether to use GPU.')
     parser.add_argument('--dataset_name', type=str, default='mnist', help='Dataset name.')
     parser.add_argument('--seed', type=int, default=3001, help='Base random seed.')
+    parser.add_argument('--num_repeats', type=int, default=1, help='How many random-seed repeats to run for each configuration.')
     parser.add_argument('--output_root', type=str, default='result/suites', help='Output folder for suite-level comparisons.')
     parser.add_argument('--dry_run', action='store_true', help='Print commands without executing them.')
     return parser.parse_args()
@@ -101,24 +218,35 @@ def run_suite(args):
 
     metrics_paths = []
     labels = []
+    repeated_results = []
     for index, run_cfg in enumerate(suite_runs):
-        run_seed = args.seed + index
-        tag = '{}_{}'.format(args.suite, run_cfg['label'])
-        command = [
-            sys.executable,
-            'main.py',
-            '--seed', str(run_seed),
-            '--experiment_tag', tag,
-        ] + build_base_args(args) + run_cfg['args']
+        run_metrics_paths = []
+        for repeat_idx in range(args.num_repeats):
+            run_seed = args.seed + repeat_idx
+            tag = '{}_{}_rep{}'.format(args.suite, run_cfg['label'], repeat_idx + 1)
+            command = [
+                sys.executable,
+                'main.py',
+                '--seed', str(run_seed),
+                '--experiment_tag', tag,
+            ] + build_base_args(args) + run_cfg['args']
 
-        print('Running:', ' '.join(command))
+            print('Running:', ' '.join(command))
+            if args.dry_run:
+                continue
+
+            subprocess.run(command, check=True)
+
+            metrics_path = find_metrics_path(args.dataset_name, run_seed, args.round_num, args.batch_size, tag)
+            run_metrics_paths.append(str(metrics_path))
+
         if args.dry_run:
             continue
 
-        subprocess.run(command, check=True)
-
-        metrics_path = find_metrics_path(args.dataset_name, run_seed, args.round_num, args.batch_size, tag)
-        metrics_paths.append(str(metrics_path))
+        run_experiments = load_experiments(run_metrics_paths, None)
+        summary = aggregate_repeated_results(run_cfg['label'], run_experiments)
+        repeated_results.append(summary)
+        metrics_paths.append(run_metrics_paths[0])
         labels.append(run_cfg['label'])
 
     if args.dry_run:
@@ -129,13 +257,42 @@ def run_suite(args):
 
     experiments = load_experiments(metrics_paths, labels)
     save_comparison_plots(experiments, str(suite_output_dir))
-    save_suite_summary(args.suite, experiments, metrics_paths, suite_output_dir)
+    save_suite_summary(args.suite, experiments, metrics_paths, suite_output_dir, repeated_results)
     print('Saved suite outputs to {}'.format(suite_output_dir))
 
 
-def save_suite_summary(suite_name, experiments, metrics_paths, output_dir):
+def aggregate_repeated_results(label, experiments):
+    metrics_list = [experiment['metrics'] for experiment in experiments]
+    best_acc_values = [metrics.get('best_test_acc', 0.0) for metrics in metrics_list]
+    final_acc_values = [metrics.get('final_test_acc', 0.0) for metrics in metrics_list]
+    best_loss_values = [metrics.get('best_test_loss', 0.0) for metrics in metrics_list]
+    final_loss_values = [metrics.get('final_test_loss', 0.0) for metrics in metrics_list]
+
+    return {
+        'label': label,
+        'plugin_name': metrics_list[0].get('plugin_name', 'none'),
+        'num_repeats': len(metrics_list),
+        'best_test_acc_mean': mean(best_acc_values),
+        'best_test_acc_std': _safe_std(best_acc_values),
+        'final_test_acc_mean': mean(final_acc_values),
+        'final_test_acc_std': _safe_std(final_acc_values),
+        'best_test_loss_mean': mean(best_loss_values),
+        'best_test_loss_std': _safe_std(best_loss_values),
+        'final_test_loss_mean': mean(final_loss_values),
+        'final_test_loss_std': _safe_std(final_loss_values),
+    }
+
+
+def _safe_std(values):
+    if len(values) <= 1:
+        return 0.0
+    return pstdev(values)
+
+
+def save_suite_summary(suite_name, experiments, metrics_paths, output_dir, repeated_results):
     summary_path = output_dir / 'suite_summary.json'
     summary_table_path = output_dir / 'suite_summary.csv'
+    repeat_summary_path = output_dir / 'suite_summary_multiseed.csv'
 
     payload = {
         'suite': suite_name,
@@ -152,6 +309,7 @@ def save_suite_summary(suite_name, experiments, metrics_paths, output_dir):
             }
             for experiment in experiments
         ],
+        'multiseed_results': repeated_results,
     }
 
     with open(summary_path, 'w') as outfile:
@@ -164,6 +322,27 @@ def save_suite_summary(suite_name, experiments, metrics_paths, output_dir):
         )
         writer.writeheader()
         for row in payload['results']:
+            writer.writerow(row)
+
+    with open(repeat_summary_path, 'w', newline='') as outfile:
+        writer = csv.DictWriter(
+            outfile,
+            fieldnames=[
+                'label',
+                'plugin_name',
+                'num_repeats',
+                'best_test_acc_mean',
+                'best_test_acc_std',
+                'final_test_acc_mean',
+                'final_test_acc_std',
+                'best_test_loss_mean',
+                'best_test_loss_std',
+                'final_test_loss_mean',
+                'final_test_loss_std',
+            ],
+        )
+        writer.writeheader()
+        for row in repeated_results:
             writer.writerow(row)
 
 
