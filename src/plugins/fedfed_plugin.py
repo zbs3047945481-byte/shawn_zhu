@@ -52,31 +52,32 @@ class FedFedClientPlugin(BaseClientPlugin):
         return feature
 
     def _compute_prototype_distill_loss(self, z_s, y):
-        if not self.global_prototypes:
+        if not self.global_prototypes: #如果服务器没有全局prototype，直接不蒸馏
             return None
-
-        prototype_losses = []
-        prototype_weights = []
+        prototype_losses = [] #每个类别对应的 prototype loss
+        prototype_weights = [] #每个类别对应的 reliability 权重
         for label in y.unique():
             class_id = int(label.item())
-            if class_id not in self.global_prototypes:
-                continue
+            if class_id not in self.global_prototypes: 
+                continue  #如果服务器没有这个类别的全局prototype，跳过
             reliability = self._get_class_reliability(class_id)
             if reliability < self.options.get('fedfed_reliability_min', 0.05):
-                continue
-            class_mask = (y == label)
-            local_proto = z_s[class_mask].mean(dim=0, keepdim=True)
+                continue  #如果这个类别的 reliability 权重低于阈值，跳过
+            class_mask = (y == label) #根据标签，找到当前batch中属于这个类别的样本索引
+            local_proto = z_s[class_mask].mean(dim=0, keepdim=True)   #计算这个类别在当前batch中的本地prototype
             target_proto = self.global_prototypes[class_id].to(z_s.device).unsqueeze(0)
+    #取服务器下发的目标 prototype
             prototype_losses.append(mse_loss(local_proto, target_proto))
-            prototype_weights.append(reliability)
+    #计算这个类别的 prototype loss
+            prototype_weights.append(reliability)#把这个类别的 reliability 权重添加到列表中
 
-        if not prototype_losses:
+        if not prototype_losses: #如果所有类别的 prototype loss 都为0，直接返回None
             return None
-        loss_tensor = torch.stack(prototype_losses)
-        weight_tensor = torch.tensor(prototype_weights, dtype=loss_tensor.dtype, device=loss_tensor.device)
-        if weight_tensor.sum() <= 0:
+        loss_tensor = torch.stack(prototype_losses) #把所有类别的 prototype loss 堆叠成一个tensor
+        weight_tensor = torch.tensor(prototype_weights, dtype=loss_tensor.dtype, device=loss_tensor.device) #把所有类别的 reliability 权重转换成一个tensor
+        if weight_tensor.sum() <= 0: #如果所有类别的 reliability 权重之和为0，直接返回None
             return None
-        return (loss_tensor * weight_tensor).sum() / weight_tensor.sum()
+        return (loss_tensor * weight_tensor).sum() / weight_tensor.sum() #计算加权平均的 prototype loss
 
     def _get_class_reliability(self, class_id):
         if not self.options.get('fedfed_enable_reliability_gating', True):
@@ -86,10 +87,10 @@ class FedFedClientPlugin(BaseClientPlugin):
         return float(self.prototype_reliability.get(class_id, 0.0))
 
     def train_batch(self, X, y):
-        self.optimizer.zero_grad()
-        pred, h = self.model(X, return_feature=True)
-        z_s, _ = self.feature_split_module(h)
-        loss_cls = F.cross_entropy(pred, y)
+        self.optimizer.zero_grad() #清空梯度
+        pred, h = self.model(X, return_feature=True) #调用主模型 Mnist_CNN 的前向传播
+        z_s, _ = self.feature_split_module(h) #调用特征分割模块，把特征分成敏感特征和非敏感特征
+        loss_cls = F.cross_entropy(pred, y) #计算分类损失
         loss = loss_cls
 
         loss_distill = self._compute_prototype_distill_loss(z_s, y)
@@ -102,6 +103,7 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.optimizer.step()
         return pred, loss.detach()
 
+#在客户端本地训练过程中，按类别累计当前轮看到的特征和样本数，为后面计算“每个类别的本地原型”做准备。
     def _accumulate_batch_prototypes(self, z_s, y):
         for label in y.unique():
             class_id = int(label.item())
@@ -115,10 +117,10 @@ class FedFedClientPlugin(BaseClientPlugin):
                 self.prototype_sums[class_id] += class_feature_sum
                 self.prototype_counts[class_id] += class_count
 
+#把客户端当前轮累计得到的各类别本地原型整理成可上传给服务器的 payload。
     def build_upload_payload(self):
         if not self.prototype_sums:
             return None
-
         local_prototypes = {}
         for class_id, feature_sum in self.prototype_sums.items():
             prototype = (feature_sum / self.prototype_counts[class_id]).unsqueeze(0)
@@ -146,43 +148,43 @@ class FedFedServerPlugin(BaseServerPlugin):
         }
 
     def aggregate_client_payloads(self, local_model_paras_set):
-        prototype_sums = {}
-        prototype_counts = {}
-        prototype_client_counts = {}
+        prototype_sums = {} #存某个类别的加权原型和
+        prototype_counts = {} #存某个类别的样本数
+        prototype_client_counts = {} #存某个类别的客户端样本数
         for update in local_model_paras_set:
             aux = update.get('aux')
-            if aux is None or 'prototypes' not in aux:
+            if aux is None or 'prototypes' not in aux: #如果客户端没有上传prototype，跳过
                 continue
-            for class_id, payload in aux['prototypes'].items():
-                prototype = payload['prototype']
-                count = payload['count']
+            for class_id, payload in aux['prototypes'].items():#遍历一个客户端上传的每个类别原型
+                prototype = payload['prototype'] #取出这个类别的原型
+                count = payload['count'] #取出这个类别的样本数
                 if class_id not in prototype_sums:
                     prototype_sums[class_id] = prototype * count
-                    prototype_counts[class_id] = count
-                    prototype_client_counts[class_id] = 1
+                    prototype_counts[class_id] = count #存某个类别的样本数
+                    prototype_client_counts[class_id] = 1 #存某个类别的客户端样本数
                 else:
-                    prototype_sums[class_id] += prototype * count
-                    prototype_counts[class_id] += count
+                    prototype_sums[class_id] += prototype * count #累加这个类别的加权原型和
+                    prototype_counts[class_id] += count #累加这个类别的样本数
                     prototype_client_counts[class_id] += 1
 
         if not prototype_sums:
             return
 
-        self.global_prototypes = {}
-        self.prototype_reliability = {}
+        self.global_prototypes = {} #存所有类别的全局原型
+        self.prototype_reliability = {} #存所有类别的reliability权重
         for class_id, weighted_sum in prototype_sums.items():
-            prototype = weighted_sum / prototype_counts[class_id]
-            self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype
+            prototype = weighted_sum / prototype_counts[class_id] #计算这个类别的全局原型
+            self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype #把全局原型存下来
             self.prototype_reliability[class_id] = self._compute_reliability(
-                prototype_counts[class_id],
-                prototype_client_counts[class_id],
-            )
+                prototype_counts[class_id], #计算这个类别的样本数
+                prototype_client_counts[class_id], #计算这个类别的客户端样本数
+            ) #计算这个类别的reliability权重
 
-    def _compute_reliability(self, sample_count, client_count):
+    def _compute_reliability(self, sample_count, client_count): #计算这个类别的可靠性权重
         if not self.options.get('fedfed_enable_reliability_gating', True):
             return 1.0
-        count_tau = max(float(self.options.get('fedfed_reliability_count_tau', 128.0)), 1.0)
-        client_tau = max(float(self.options.get('fedfed_reliability_client_tau', 5.0)), 1.0)
-        count_reliability = min(float(sample_count) / count_tau, 1.0)
-        client_reliability = min(float(client_count) / client_tau, 1.0)
-        return count_reliability * client_reliability
+        count_tau = max(float(self.options.get('fedfed_reliability_count_tau', 128.0)), 1.0) #计算这个类别的样本数阈值
+        client_tau = max(float(self.options.get('fedfed_reliability_client_tau', 5.0)), 1.0) #计算这个类别的客户端样本数阈值
+        count_reliability = min(float(sample_count) / count_tau, 1.0) #计算这个类别的样本数可靠性
+        client_reliability = min(float(client_count) / client_tau, 1.0) #计算这个类别的客户端样本数可靠性
+        return count_reliability * client_reliability #计算这个类别的可靠性权重

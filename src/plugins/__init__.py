@@ -11,7 +11,7 @@ PLUGIN_REGISTRY = {
     },
 }
 
-
+#负责把配置解析成最终插件名
 def resolve_plugin_name(options):
     plugin_name = options.get('plugin_name', 'none')
     if plugin_name != 'none':

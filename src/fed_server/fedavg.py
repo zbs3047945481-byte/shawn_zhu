@@ -26,7 +26,7 @@ class FedAvgTrainer(BaseFederated):
         super(FedAvgTrainer, self).__init__(
             options,
             dataset,
-            clients_label,
+            clients_label,#每个客户端对应的数据索引列表
             model,
             self.optimizer,
             model_builder=model_builder,
@@ -46,7 +46,7 @@ class FedAvgTrainer(BaseFederated):
         #每一轮=一次完整的：下发模型、本地训练、聚合
         for round_i in range(self.num_round):
             #用当前全局模型、在测试集上评估、记录accuracy/loss
-            self.test_latest_model_on_testdata(round_i)
+            self.test_latest_model_on_testdata(round_i)#全局模型评估
             #客户端抽样
             selected_clients = self.select_clients()
 
