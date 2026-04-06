@@ -25,7 +25,6 @@ class BaseFederated(object):
         self.optimizer_builder = optimizer_builder
         if self.model_builder is None or self.optimizer_builder is None:
             raise ValueError('Both model_builder and optimizer_builder are required.')
-        # 如果请求使用 GPU 但 CUDA 不可用，则使用 CPU
         self.gpu = options['gpu'] and torch.cuda.is_available()
         self.batch_size = options['batch_size']#batch_size=每轮训练用多少条样本
         self.num_round = options['round_num']#round_num=联邦学习总共训练多少轮
@@ -38,6 +37,8 @@ class BaseFederated(object):
         self.metrics = Metrics(options, self.clients, self.name)#初始化实验指标记录器
         self.latest_global_model = copy.deepcopy(self.get_model_parameters())#latest_global_model=最新全局模型
         self.server_plugin = build_server_plugin(options, self.gpu)#根据配置创建服务器端插件。
+
+
 #我这个 FedAvgTrainer 已经知道要用什么模型、什么优化器、哪些数据、哪些客户端划分规则了。
 #现在把这些信息交给 BaseFederated，让它帮我把整个联邦训练基础设施建起来，包括客户端、全局参数、测试模块和插件系统。
 #model：当前已经创建好的那个服务器模型对象
@@ -111,27 +112,19 @@ class BaseFederated(object):
         local_model_paras_set = []  #每个客户端训练后上传的模型更新结果
         stats = []  #每个客户端训练后的统计信息，比如 loss、acc、time
         for i, client in enumerate(select_clients, start=1):
-            client.set_model_parameters(self.latest_global_model)
-#把服务器当前保存的最新全局模型参数 self.latest_global_model 写入这个客户端的本地模型。
+            client.set_model_parameters(self.latest_global_model)#把服务器当前保存的最新全局模型参数写入这个客户端的本地模型。
             client.set_learning_rate(self.optimizer.param_groups[0]['lr'])#把服务器当前记录的学习率发给客户端。
             if self.server_plugin is not None:
-                client.set_plugin_payload(self.server_plugin.build_broadcast_payload())
-#全局prototype、prototypre reliability是客户端下一轮蒸馏训练要用的“全局辅助信息”。
-#把这个payload交给客户端保存起来。“服务器额外信息下发”。
+                client.set_plugin_payload(self.server_plugin.build_broadcast_payload())#服务器额外信息下发。
             update, stat = client.local_train()
-            local_model_paras_set.append(update)
-    #local_model_paras_set 里装着本轮所有参与客户端的更新结果：模型参数+样本数+额外信息
-            stats.append(stat)
-    #stats 里装着本轮所有参与客户端的训练统计
+            local_model_paras_set.append(update)#本轮所有参与客户端的更新结果：模型参数+样本数+额外信息
+            stats.append(stat)#本轮所有参与客户端的训练统计
             if True:
                 print("Round: {:>2d} | CID: {: >3d} ({:>2d}/{:>2d})| "
                       "Loss {:>.4f} | Acc {:>5.2f}% | Time: {:>.2f}s ".format(
                        round_i, client.id, i, int(self.per_round_c_fraction * self.clients_num),
                        stat['loss'], stat['acc'] * 100, stat['time'], ))
         return local_model_paras_set, stats
-#“对于本轮被选中的每个客户端，先把最新全局模型参数同步给它，再同步当前学习率；
-#如果有插件，就把服务器插件生成的辅助信息一起发下去；
-#然后让客户端在本地数据上训练，并把训练后的模型更新和统计结果收集起来，最后统一返回给服务器用于聚合。”
 
     def aggregate_parameters(self, local_model_paras_set):
         # Each element is update dict: {"weights", "num_samples", "aux"}
@@ -147,8 +140,6 @@ class BaseFederated(object):
             train_data_num += num_sample
         for var in averaged_paras:
             averaged_paras[var] /= train_data_num
-
-        # FedFed plugin: aggregate class-wise prototypes.
         if self.server_plugin is not None:
             self.server_plugin.aggregate_client_payloads(local_model_paras_set)
         return averaged_paras

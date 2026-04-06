@@ -53,18 +53,11 @@ class BaseClient():
 
     def local_update(self, local_dataset, options, ):
         use_plugin = self.plugin is not None
-#如果当前客户端对象里挂了插件实例就启用插件训练逻辑；否则走普通训练逻辑
         localTrainDataLoader = DataLoader(local_dataset, batch_size=options['batch_size'], shuffle=True)
-#客户端把自己的本地数据集包装成一个DataLoader对象，这个对象可以被PyTorch直接使用。
-#batch_size=每轮训练用多少条样本
-#shuffle=是否打乱数据
         self.model.train() #把模型设置为训练模式
         if use_plugin:
-            self.plugin.on_round_start(self.optimizer.param_groups[0]['lr'], self.plugin_payload)
-    #“正式训练前，先把插件状态准备好。”
-
+            self.plugin.on_round_start(self.optimizer.param_groups[0]['lr'], self.plugin_payload)#正式训练前，先把插件状态准备好。
         train_loss = train_acc = train_total = 0
-
         for epoch in range(options['local_epoch']):  #表示这个客户端会把自己的本地数据完整训练 local_epoch 遍。
             train_loss = train_acc = train_total = 0
             for X, y in localTrainDataLoader:
@@ -78,19 +71,15 @@ class BaseClient():
                     loss = criterion(pred, y)
                     loss.backward()
                     self.optimizer.step()
-
                 _, predicted = torch.max(pred, 1)
                 correct = predicted.eq(y).sum().item()
                 target_size = y.size(0)
                 train_loss += loss.item() * y.size(0)
                 train_acc += correct
                 train_total += target_size
-
         local_model_paras = copy.deepcopy(self.get_model_parameters())
         return_dict = {"id": self.id,
                        "loss": train_loss / train_total,
                        "acc": train_acc / train_total}
-
         aux = self.plugin.build_upload_payload() if use_plugin else None
-
         return local_model_paras, return_dict, aux
