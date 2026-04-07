@@ -72,4 +72,10 @@ class Metrics(object):
         with open(metrics_dir, 'w') as ouf:
             json.dump(metrics, ouf, indent=2)
 
+        table_dir = os.path.join(self.exp_dir, 'metrics_table.csv')
+        with open(table_dir, 'w') as ouf:
+            ouf.write('round,test_acc,test_loss\n')
+            for round_i, (acc_value, loss_value) in enumerate(zip(self.acc_on_g_test_data, self.loss_on_g_test_data)):
+                ouf.write('{},{:.10f},{:.10f}\n'.format(round_i, acc_value, loss_value))
+
         save_single_run_plots(metrics, self.exp_dir)

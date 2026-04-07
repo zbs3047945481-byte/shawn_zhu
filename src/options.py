@@ -106,14 +106,6 @@ def input_options():
                         help='Gaussian noise std for z_s (privacy).')
     parser.add_argument('--fedfed_lambda_distill', type=float, default=1.0,
                         help='Weight of feature distillation loss L_distill.')
-    parser.add_argument('--fedfed_enable_reliability_gating', type=str2bool, default=True,
-                        help='Use prototype reliability to gate distillation strength.')
-    parser.add_argument('--fedfed_reliability_count_tau', type=float, default=128.0,
-                        help='Target aggregated sample count for a class prototype to be considered reliable.')
-    parser.add_argument('--fedfed_reliability_client_tau', type=float, default=5.0,
-                        help='Target number of contributing clients for a class prototype to be considered reliable.')
-    parser.add_argument('--fedfed_reliability_min', type=float, default=0.05,
-                        help='Minimum reliability required before a class prototype participates in distillation.')
     
     args = parser.parse_args()
     #从命令行读取参数

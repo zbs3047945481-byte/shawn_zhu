@@ -33,118 +33,6 @@ SUITES = {
         {'label': 'dim_64', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64']},
         {'label': 'dim_128', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '128']},
     ],
-    'reliability_sweep': [
-        {
-            'label': 'rel_off',
-            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
-        },
-        {
-            'label': 'rel_default',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '128',
-                '--fedfed_reliability_client_tau', '5',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-        {
-            'label': 'rel_fast_open',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '64',
-                '--fedfed_reliability_client_tau', '2',
-                '--fedfed_reliability_min', '0.01',
-            ],
-        },
-        {
-            'label': 'rel_conservative',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '256',
-                '--fedfed_reliability_client_tau', '8',
-                '--fedfed_reliability_min', '0.10',
-            ],
-        },
-        {
-            'label': 'rel_high_count_only',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '256',
-                '--fedfed_reliability_client_tau', '2',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-        {
-            'label': 'rel_high_coverage_only',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '64',
-                '--fedfed_reliability_client_tau', '8',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-    ],
-    'reliability_sweep_multiseed': [
-        {
-            'label': 'rel_off',
-            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
-        },
-        {
-            'label': 'rel_default',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '128',
-                '--fedfed_reliability_client_tau', '5',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-        {
-            'label': 'rel_fast_open',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '64',
-                '--fedfed_reliability_client_tau', '2',
-                '--fedfed_reliability_min', '0.01',
-            ],
-        },
-        {
-            'label': 'rel_conservative',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '256',
-                '--fedfed_reliability_client_tau', '8',
-                '--fedfed_reliability_min', '0.10',
-            ],
-        },
-        {
-            'label': 'rel_high_count_only',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '256',
-                '--fedfed_reliability_client_tau', '2',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-        {
-            'label': 'rel_high_coverage_only',
-            'args': [
-                '--plugin_name', 'fedfed_prototype',
-                '--fedfed_enable_reliability_gating', 'true',
-                '--fedfed_reliability_count_tau', '64',
-                '--fedfed_reliability_client_tau', '8',
-                '--fedfed_reliability_min', '0.05',
-            ],
-        },
-    ],
     'thesis_main': [
         {'label': 'FedAvg_alpha_1.0', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '1.0']},
         {'label': 'FedFed_alpha_1.0', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '1.0']},
@@ -160,10 +48,6 @@ SUITES = {
         {'label': 'Prototype_dim_64', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64']},
         {'label': 'Prototype_dim_64_no_noise', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_noise_sigma', '0.0']},
         {'label': 'Prototype_dim_64_low_lambda', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_sensitive_dim', '64', '--fedfed_lambda_distill', '0.1']},
-        {
-            'label': 'Prototype_reliability_off',
-            'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_reliability_gating', 'false'],
-        },
     ],
     'thesis_heterogeneity': [
         {'label': 'label_only', 'args': ['--plugin_name', 'fedfed_prototype', '--enable_quantity_skew', 'false', '--enable_feature_skew', 'false', '--dirichlet_alpha', '0.3']},
