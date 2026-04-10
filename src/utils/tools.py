@@ -26,16 +26,16 @@ def _ensure_min_samples(assignments, min_samples):
     if min_samples <= 0:
         return assignments
 
-    lengths = [len(items) for items in assignments]
-    for client_id, current_len in enumerate(lengths):
-        while current_len < min_samples:
-            donor_id = int(np.argmax(lengths))
-            if donor_id == client_id or lengths[donor_id] <= min_samples:
+    lengths = [len(items) for items in assignments]#每个客户端的数据量
+    for client_id, current_len in enumerate(lengths):#遍历每个客户端，确保每个客户端的数据量至少为min_samples
+        while current_len < min_samples:#如果当前客户端的数据量小于 min_samples，就继续移动数据
+            donor_id = int(np.argmax(lengths))#找到数据量最大的客户端
+            if donor_id == client_id or lengths[donor_id] <= min_samples:#如果 donor_id 就是当前客户端，或者 donor_id 的数据量已经小于等于 min_samples，就跳出循环
                 break
-            assignments[client_id].append(assignments[donor_id].pop())
-            lengths[client_id] += 1
-            lengths[donor_id] -= 1
-            current_len += 1
+            assignments[client_id].append(assignments[donor_id].pop())#把 donor_id 的数据移动到 client_id
+            lengths[client_id] += 1#client_id 的数据量增加1
+            lengths[donor_id] -= 1#donor_id 的数据量减少1
+            current_len += 1#current_len 增加1
     return assignments
 
 
@@ -62,24 +62,27 @@ def _build_iid_partition(train_labels, client_num, min_samples, enable_quantity_
         counts[:len(train_labels) % client_num] += 1
     return _split_by_counts(shuffled_indices, counts)
 
-
+#模拟label skew和quantity skew两种数据异质性
 def _build_dirichlet_partition(train_labels, client_num, alpha, min_samples, enable_quantity_skew, quantity_skew_beta):
-    labels = np.asarray(train_labels)
-    assignments = [[] for _ in range(client_num)]
-    client_activity = np.ones(client_num, dtype=float)
-    if enable_quantity_skew:
-        client_activity = np.random.dirichlet(np.full(client_num, quantity_skew_beta))
+    labels = np.asarray(train_labels) #np.asarray() 将输入转换为NumPy数组
+    assignments = [[] for _ in range(client_num)] #长度为client_num的列表，每个元素是一个空列表，用来存放每个客户端的数据索引
+    client_activity = np.ones(client_num, dtype=float) #ones：创建一个全是1的数组，dtype=float：指定数组元素类型为浮点数
+    if enable_quantity_skew: #是否允许不同客户端间样本数量不一致
+        client_activity = np.random.dirichlet(np.full(client_num, quantity_skew_beta))#创建一个长度为 client_num、每个元素都等于quantity_skew_beta的数组。
+#dirichlet两个约束：所有值不可为负；所有值加和为1。
 
-    for cls in np.unique(labels):
-        class_indices = np.where(labels == cls)[0]
-        np.random.shuffle(class_indices)
-        class_weights = np.random.dirichlet(np.full(client_num, alpha))
-        class_weights = class_weights * client_activity
-        class_weights = class_weights / class_weights.sum()
-        split_points = (np.cumsum(class_weights) * len(class_indices)).astype(int)[:-1]
-        splits = np.split(class_indices, split_points)
-        for client_id, split in enumerate(splits):
-            assignments[client_id].extend(split.tolist())
+    for cls in np.unique(labels): #每次处理一类，np.unique()：返回数组中所有不重复的值，并按升序排列。
+        class_indices = np.where(labels == cls)[0] #np.where()：返回数组中满足条件的元素的索引。
+        np.random.shuffle(class_indices) #原地打乱数组顺序
+        class_weights = np.random.dirichlet(np.full(client_num, alpha)) #为“当前这个类别”随机生成一个客户端分配比例。label skew核心
+        class_weights = class_weights * client_activity #label skew和quantity skew融合起来
+        class_weights = class_weights / class_weights.sum() #上一步打乱了和为1，重新归一化，使其和为1
+        split_points = (np.cumsum(class_weights) * len(class_indices)).astype(int)[:-1] #np.cumsum()：返回数组中每个元素的累积和。
+#sequence[start:stop:step]  start：从哪里开始；stop：到哪里结束，不含stop本身；step：步长。-1表示最后一个元素
+        #astype(int)：将结果转换为整数类型。[:-1]：去掉最后一个元素。 这一行的目的就是：把比例转换成切分位置
+        splits = np.split(class_indices, split_points) #np.split()：将数组分割为多个子数组。
+        for client_id, split in enumerate(splits): #enumerate()：返回索引和对应的值。
+            assignments[client_id].extend(split.tolist()) #tolist()：将NumPy数组转换为Python列表。
 
     return _ensure_min_samples(assignments, min_samples)
 
@@ -88,8 +91,8 @@ def get_each_client_data_index(train_labels, client_num, options=None):
     options = options or {}
     strategy = options.get('partition_strategy', 'dirichlet')
     min_samples = options.get('min_samples_per_client', 0)
-    enable_quantity_skew = options.get('enable_quantity_skew', False)
-    quantity_skew_beta = options.get('quantity_skew_beta', 1.0)
+    enable_quantity_skew = options.get('enable_quantity_skew', False) #是否启用数量偏斜
+    quantity_skew_beta = options.get('quantity_skew_beta', 1.0) #数量偏斜参数
 
     if strategy == 'iid':
         return _build_iid_partition(

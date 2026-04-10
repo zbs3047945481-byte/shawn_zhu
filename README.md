@@ -92,7 +92,7 @@ Plugin implementation:
 Model and feature module:
 
 - `src/models/mnist_cnn.py`
-- `src/models/feature_split.py`
+- `src/plugins/feature_split.py`
 
 Experiment tooling:
 

@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from src.models.feature_split import FeatureSplitModule
+from src.plugins.feature_split import FeatureSplitModule
 from src.plugins.base import BaseClientPlugin, BaseServerPlugin
 
 
@@ -32,8 +32,7 @@ class FedFedClientPlugin(BaseClientPlugin):
     def on_round_start(self, learning_rate, server_payload):
         for group in self.optimizer.param_groups:
             group['lr'] = learning_rate
-        server_payload = server_payload or {}
-        self.global_prototypes = server_payload.get('global_prototypes')
+        self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
         self.feature_split_module.train()
         self.prototype_sums = {}
         self.prototype_counts = {}
@@ -50,7 +49,7 @@ class FedFedClientPlugin(BaseClientPlugin):
             feature = feature + noise_sigma * torch.randn_like(feature, device=feature.device)
         return feature
 
-    def _compute_prototype_distill_loss(self, z_s, y):
+    def _compute_prototype_distill_loss(self, z_s, y): #计算蒸馏损失，本地原型对齐全局原型
         if not self.global_prototypes: #如果服务器没有全局prototype，直接不蒸馏
             return None
         prototype_losses = [] #每个类别对应的 prototype loss
@@ -63,11 +62,12 @@ class FedFedClientPlugin(BaseClientPlugin):
             target_proto = self.global_prototypes[class_id].to(z_s.device).unsqueeze(0)
     #取服务器下发的目标 prototype
             prototype_losses.append(mse_loss(local_proto, target_proto))
+    #计算这个类别的 prototype loss
 
         if not prototype_losses: #如果所有类别的 prototype loss 都为0，直接返回None
             return None
         loss_tensor = torch.stack(prototype_losses) #把所有类别的 prototype loss 堆叠成一个tensor
-        return loss_tensor.mean()
+        return loss_tensor.mean() #计算所有可用类别 prototype loss 的平均值
 
     def train_batch(self, X, y):
         self.optimizer.zero_grad() #清空梯度

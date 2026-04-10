@@ -14,7 +14,7 @@
 推荐交付目录：
 
 - `src/plugins/`
-- `src/models/feature_split.py`
+- `src/plugins/feature_split.py`
 
 ## 2. 外部接入说明
 

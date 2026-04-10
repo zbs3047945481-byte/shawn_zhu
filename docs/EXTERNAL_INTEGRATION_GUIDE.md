@@ -13,14 +13,13 @@
 如果你要把插件复制到其他项目，优先复制：
 
 - `src/plugins/`
-- `src/models/feature_split.py`
 
 其中核心运行所需主要是：
 
 - `src/plugins/base.py`
 - `src/plugins/__init__.py`
 - `src/plugins/fedfed_plugin.py`
-- `src/models/feature_split.py`
+- `src/plugins/feature_split.py`
 
 ## 2. 外部项目只需要改 3 个接入点
 

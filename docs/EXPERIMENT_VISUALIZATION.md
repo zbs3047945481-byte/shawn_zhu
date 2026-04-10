@@ -61,8 +61,6 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 - `alpha_sweep`
 - `lambda_sweep`
 - `dim_sweep`
-- `reliability_sweep`
-- `reliability_sweep_multiseed`
 - `thesis_main`
 - `thesis_ablation`
 - `thesis_heterogeneity`
@@ -77,7 +75,7 @@ python run_experiment_suite.py --suite baseline_vs_plugin
 - 不同 `fedfed_lambda_distill`
 - 不同 `fedfed_sensitive_dim`
 - 不同 `fedfed_noise_sigma`
-- 不同 prototype reliability 配置
+- 不同异构强度和不同蒸馏强度配置
 
 ## 4. 当前可视化相关代码位置
 
