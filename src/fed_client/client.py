@@ -71,13 +71,13 @@ class BaseClient():
                     loss = criterion(pred, y)
                     loss.backward()
                     self.optimizer.step()
-                _, predicted = torch.max(pred, 1)
-                correct = predicted.eq(y).sum().item()
-                target_size = y.size(0)
+                _, predicted = torch.max(pred, 1) #从预测 logits 中取每个样本得分最高的类别，作为预测标签。
+                correct = predicted.eq(y).sum().item() #统计当前 batch 中预测正确的样本数。
+                target_size = y.size(0) #得到当前 batch 的样本数量。
                 train_loss += loss.item() * y.size(0)
                 train_acc += correct
                 train_total += target_size
-        local_model_paras = copy.deepcopy(self.get_model_parameters())
+        local_model_paras = copy.deepcopy(self.get_model_parameters()) #训练结束后，深拷贝当前模型参数。
         return_dict = {"id": self.id,
                        "loss": train_loss / train_total,
                        "acc": train_acc / train_total}
