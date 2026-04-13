@@ -75,7 +75,7 @@
 ### 客户端侧
 
 1. 前向得到中间特征 `h`
-2. 通过 `FeatureSplitModule` 得到 `z_s`
+2. 通过低维投影模块得到 `z_s`
 3. 按 batch 内类别统计局部 prototype
 4. 使用全局 prototype bank 计算蒸馏损失
 5. 本轮结束后生成本地类原型并上传

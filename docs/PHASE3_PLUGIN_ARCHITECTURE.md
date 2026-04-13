@@ -6,7 +6,7 @@
 
 将以下逻辑从训练骨架中抽离：
 
-- 客户端特征分离
+- 客户端低维投影
 - 客户端蒸馏损失计算
 - 客户端类原型统计与上传载荷构造
 - 服务端类原型聚合
@@ -25,7 +25,7 @@
 
 职责：
 
-- 构建 `FeatureSplitModule`
+- 构建低维投影模块
 - 维护插件专属优化器
 - 接收服务端下发的 `global_prototypes`
 - 计算 `L_cls + lambda * L_distill`
@@ -62,7 +62,7 @@
 
 现在的 `BaseClient` 不再直接知道：
 
-- `FeatureSplitModule` 的内部细节
+- 低维投影模块的内部细节
 - prototype distillation 的实现细节
 - prototype 上传格式的内部构造
 

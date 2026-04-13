@@ -39,7 +39,7 @@ class FedAvgTrainer(BaseFederated):
                 options.get('fedfed_sensitive_dim', 64), options.get('fedfed_lambda_distill', 1.0)))
 
     def train(self):
-        print('>>> Select {} clients per round \n'.format(int(self.per_round_c_fraction * self.clients_num)))
+        print('>>> Select {} clients per round \n'.format(self._resolve_num_clients_per_round()))
 
         # self.latest_global_model = self.get_model_parameters()
         #self.num_round=通信轮数
@@ -68,7 +68,7 @@ class FedAvgTrainer(BaseFederated):
     #非常标准的FedAvg实现
     def select_clients(self):
         #计算本轮客户端数量，防止抽样数量大于总客户端数
-        num_clients = min(int(self.per_round_c_fraction * self.clients_num), self.clients_num)
+        num_clients = self._resolve_num_clients_per_round()
         #随机选client索引，replace=False：不重复抽样，每轮client是随机的
         index = np.random.choice(len(self.clients), num_clients, replace=False,)
         #根据索引拿到client对象
@@ -79,3 +79,9 @@ class FedAvgTrainer(BaseFederated):
             select_clients.append(self.clients[i])
         #返回client列表
         return select_clients
+
+    def _resolve_num_clients_per_round(self):
+        if self.clients_num <= 0:
+            raise ValueError('No clients are available for federation.')
+        raw_num_clients = int(self.per_round_c_fraction * self.clients_num)
+        return min(max(raw_num_clients, 1), self.clients_num)

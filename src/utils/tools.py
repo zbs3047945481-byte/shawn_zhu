@@ -63,8 +63,7 @@ def _build_iid_partition(train_labels, client_num, min_samples, enable_quantity_
     return _split_by_counts(shuffled_indices, counts)
 
 #模拟label skew和quantity skew两种数据异质性
-def _build_dirichlet_partition(train_labels, client_num, alpha, min_samples, enable_quantity_skew, quantity_skew_beta):
-    labels = np.asarray(train_labels) #np.asarray() 将输入转换为NumPy数组
+def _build_dirichlet_partition_once(labels, client_num, alpha, enable_quantity_skew, quantity_skew_beta):
     assignments = [[] for _ in range(client_num)] #长度为client_num的列表，每个元素是一个空列表，用来存放每个客户端的数据索引
     client_activity = np.ones(client_num, dtype=float) #ones：创建一个全是1的数组，dtype=float：指定数组元素类型为浮点数
     if enable_quantity_skew: #是否允许不同客户端间样本数量不一致
@@ -83,8 +82,28 @@ def _build_dirichlet_partition(train_labels, client_num, alpha, min_samples, ena
         splits = np.split(class_indices, split_points) #np.split()：将数组分割为多个子数组。
         for client_id, split in enumerate(splits): #enumerate()：返回索引和对应的值。
             assignments[client_id].extend(split.tolist()) #tolist()：将NumPy数组转换为Python列表。
+    return assignments
 
-    return _ensure_min_samples(assignments, min_samples)
+
+def _build_dirichlet_partition(train_labels, client_num, alpha, min_samples, enable_quantity_skew, quantity_skew_beta):
+    labels = np.asarray(train_labels) #np.asarray() 将输入转换为NumPy数组
+    max_retries = 100
+    for _ in range(max_retries):
+        assignments = _build_dirichlet_partition_once(
+            labels,
+            client_num,
+            alpha,
+            enable_quantity_skew,
+            quantity_skew_beta,
+        )
+        if min_samples <= 0 or min(len(items) for items in assignments) >= min_samples:
+            return assignments
+
+    raise ValueError(
+        'Failed to build a Dirichlet partition satisfying min_samples_per_client={} '
+        'after {} retries. Consider increasing dirichlet_alpha, reducing min_samples_per_client, '
+        'or reducing num_of_clients.'.format(min_samples, max_retries)
+    )
 
 
 def get_each_client_data_index(train_labels, client_num, options=None):

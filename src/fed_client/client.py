@@ -59,7 +59,6 @@ class BaseClient():
             self.plugin.on_round_start(self.optimizer.param_groups[0]['lr'], self.plugin_payload)#正式训练前，先把插件状态准备好。
         train_loss = train_acc = train_total = 0
         for epoch in range(options['local_epoch']):  #表示这个客户端会把自己的本地数据完整训练 local_epoch 遍。
-            train_loss = train_acc = train_total = 0
             for X, y in localTrainDataLoader:
                 if self.gpu:
                     X, y = X.cuda(), y.cuda()

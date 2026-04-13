@@ -21,6 +21,8 @@
 - `src/plugins/fedfed_plugin.py`
 - `src/plugins/feature_split.py`
 
+这里的 `feature_split.py` 当前承担的是低维投影功能，历史文件名保留仅为兼容仓库结构。
+
 ## 2. 外部项目只需要改 3 个接入点
 
 ### 接入点 1：模型 forward

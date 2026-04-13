@@ -122,7 +122,7 @@ class BaseFederated(object):
             if True:
                 print("Round: {:>2d} | CID: {: >3d} ({:>2d}/{:>2d})| "
                       "Loss {:>.4f} | Acc {:>5.2f}% | Time: {:>.2f}s ".format(
-                       round_i, client.id, i, int(self.per_round_c_fraction * self.clients_num),
+                       round_i, client.id, i, len(select_clients),
                        stat['loss'], stat['acc'] * 100, stat['time'], ))
         return local_model_paras_set, stats
 
@@ -165,6 +165,7 @@ class BaseFederated(object):
     def global_test(self, use_test_data=True):
         assert self.latest_global_model is not None  #运行前检查
         self.set_model_parameters(self.latest_global_model) #把最新全局参数装载回服务器模型
+        self.model.eval()
         test_data = self.dataset.test_data
         test_label = self.dataset.test_label
         testDataLoader = DataLoader(  #这一段是把测试集包装成 PyTorch 可迭代的数据加载器。

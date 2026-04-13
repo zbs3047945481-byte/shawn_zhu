@@ -20,12 +20,12 @@ class FedFedClientPlugin(BaseClientPlugin):
 
         feature_dim = options.get('fedfed_feature_dim', 512)
         sensitive_dim = options.get('fedfed_sensitive_dim', 64)
-        self.feature_split_module = FeatureSplitModule(feature_dim, sensitive_dim)
+        self.projection_module = FeatureSplitModule(feature_dim, sensitive_dim)
         if self.gpu:
-            self.feature_split_module.cuda()
+            self.projection_module.cuda()
 
         self.optimizer = torch.optim.Adam(
-            list(self.model.parameters()) + list(self.feature_split_module.parameters()),
+            list(self.model.parameters()) + list(self.projection_module.parameters()),
             lr=options.get('lr', 0.001),
         )
 
@@ -36,7 +36,7 @@ class FedFedClientPlugin(BaseClientPlugin):
 #把每个参数组的学习率都更新成服务器当前下发的学习率。
 #含义是：插件这部分参数更新节奏要和服务器主调度保持一致。
         self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
-        self.feature_split_module.train()
+        self.projection_module.train()
         self.prototype_sums = {}
         self.prototype_counts = {}
 
@@ -86,7 +86,7 @@ class FedFedClientPlugin(BaseClientPlugin):
     def train_batch(self, X, y):
         self.optimizer.zero_grad() #清空梯度
         pred, h = self.model(X, return_feature=True) #调用主模型 Mnist_CNN 的前向传播
-        z_s, _ = self.feature_split_module(h) #调用特征分割模块，把特征分成敏感特征和非敏感特征
+        z_s = self.projection_module(h) #把中间特征投影到低维 prototype 蒸馏空间
         loss_cls = F.cross_entropy(pred, y) #计算分类损失
         loss = loss_cls
 
