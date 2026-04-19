@@ -73,6 +73,8 @@ def input_options():
                         help='Client data partition strategy.')
     parser.add_argument('--dirichlet_alpha', type=float, default=0.3,
                         help='Dirichlet alpha for label skew. Smaller means stronger heterogeneity.')
+    parser.add_argument('--unify_heterogeneity_alpha', type=str2bool, default=True,
+                        help='Whether to let dirichlet_alpha jointly control label, quantity, and feature heterogeneity.')
     parser.add_argument('--min_samples_per_client', type=int, default=32,
                         help='Ensure each client owns at least this many training samples.')
     parser.add_argument('--enable_quantity_skew', type=str2bool, default=True,
@@ -81,6 +83,14 @@ def input_options():
                         help='Dirichlet beta for client quantity skew. Smaller means more imbalance.')
     parser.add_argument('--enable_feature_skew', type=str2bool, default=True,
                         help='Whether to apply client-specific feature shift/noise.')
+    parser.add_argument('--feature_alpha_anchor', type=float, default=0.1,
+                        help='Reference alpha that corresponds to the strongest feature skew when alpha is unified.')
+    parser.add_argument('--feature_max_scale_delta', type=float, default=0.15,
+                        help='Maximum multiplicative scale deviation from 1.0 under the strongest unified feature skew.')
+    parser.add_argument('--feature_max_bias_std', type=float, default=0.05,
+                        help='Maximum additive bias std under the strongest unified feature skew.')
+    parser.add_argument('--feature_max_noise_std', type=float, default=0.05,
+                        help='Maximum additive Gaussian noise std under the strongest unified feature skew.')
     parser.add_argument('--feature_noise_std', type=float, default=0.05,
                         help='Std of client-specific additive Gaussian noise.')
     parser.add_argument('--feature_scale_low', type=float, default=0.85,
@@ -106,6 +116,16 @@ def input_options():
                         help='Gaussian noise std for z_s (privacy).')
     parser.add_argument('--fedfed_lambda_distill', type=float, default=1.0,
                         help='Weight of feature distillation loss L_distill.')
+    parser.add_argument('--fedfed_enable_projection', type=str2bool, default=True,
+                        help='Whether to use the low-dimensional projection module before prototype sharing.')
+    parser.add_argument('--fedfed_enable_prototype_sharing', type=str2bool, default=True,
+                        help='Whether to upload, aggregate, and broadcast class prototypes across clients.')
+    parser.add_argument('--fedfed_enable_distill', type=str2bool, default=True,
+                        help='Whether to apply prototype distillation loss during local training.')
+    parser.add_argument('--fedfed_enable_clip', type=str2bool, default=True,
+                        help='Whether to clip prototype norm before upload.')
+    parser.add_argument('--fedfed_enable_noise', type=str2bool, default=True,
+                        help='Whether to add Gaussian noise to uploaded prototypes.')
     
     args = parser.parse_args()
     #从命令行读取参数

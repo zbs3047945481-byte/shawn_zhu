@@ -157,6 +157,58 @@ def save_strategy_summary_plot(summary_rows, output_path, title='Three Distillat
     return True
 
 
+def save_ablation_summary_plot(summary_rows, output_path, title='Ablation Summary'):
+    if not plotting_available() or not summary_rows:
+        return False
+
+    import numpy as np
+
+    labels = [row['label'] for row in summary_rows]
+    final_means = [row['final_test_acc_mean'] for row in summary_rows]
+    final_stds = [row['final_test_acc_std'] for row in summary_rows]
+    best_means = [row['best_test_acc_mean'] for row in summary_rows]
+
+    x = np.arange(len(labels))
+
+    fig, ax = plt.subplots(figsize=(12, 6))
+    fig.patch.set_facecolor('#f7f3eb')
+    ax.set_facecolor('#fffdf8')
+    bars = ax.bar(
+        x,
+        final_means,
+        yerr=final_stds,
+        color=['#6c8ead', '#d98f3d', '#b56576', '#7aa974', '#8d6cab', '#c76d3a'],
+        edgecolor='#3d3d3d',
+        linewidth=0.9,
+        capsize=6,
+    )
+    ax.plot(x, best_means, color='#2f4858', marker='o', linewidth=2.0, label='Best Accuracy Mean')
+
+    ax.set_title(title, fontsize=15, pad=14, weight='bold')
+    ax.set_ylabel('Final Accuracy', fontsize=12)
+    ax.set_xticks(x)
+    ax.set_xticklabels(labels, rotation=18, ha='right')
+    ax.grid(axis='y', alpha=0.22, linestyle='--')
+    ax.legend(frameon=False, loc='upper left')
+
+    for bar, value in zip(bars, final_means):
+        ax.annotate(
+            '{:.2f}%'.format(value * 100.0),
+            xy=(bar.get_x() + bar.get_width() / 2, value),
+            xytext=(0, 4),
+            textcoords='offset points',
+            ha='center',
+            va='bottom',
+            fontsize=9,
+            color='#2f2f2f',
+        )
+
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=220)
+    plt.close(fig)
+    return True
+
+
 def _save_curve(x_values, y_values, output_path, title, xlabel, ylabel):
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(x_values, y_values, linewidth=2)

@@ -12,6 +12,34 @@ def set_random_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
+def resolve_heterogeneity_options(options=None):
+    options = dict(options or {})
+    if not options.get('unify_heterogeneity_alpha', False):
+        return options
+
+    alpha = float(options.get('dirichlet_alpha', 0.3))
+    alpha = max(alpha, 1e-6)
+
+    # Use one alpha to control all heterogeneity sources:
+    # smaller alpha => stronger label skew, stronger quantity skew, stronger feature shift.
+    options['quantity_skew_beta'] = alpha
+
+    feature_anchor = max(float(options.get('feature_alpha_anchor', 0.1)), 1e-6)
+    feature_strength = min(1.0, feature_anchor / alpha)
+
+    max_scale_delta = float(options.get('feature_max_scale_delta', 0.15))
+    max_bias_std = float(options.get('feature_max_bias_std', 0.05))
+    max_noise_std = float(options.get('feature_max_noise_std', 0.05))
+
+    scale_delta = max_scale_delta * feature_strength
+    options['feature_scale_low'] = 1.0 - scale_delta
+    options['feature_scale_high'] = 1.0 + scale_delta
+    options['feature_bias_std'] = max_bias_std * feature_strength
+    options['feature_noise_std'] = max_noise_std * feature_strength
+    options['feature_unified_strength'] = feature_strength
+    return options
+
+
 def _split_by_counts(indices, counts):
     assignments = []
     start = 0
@@ -96,7 +124,7 @@ def _build_dirichlet_partition(train_labels, client_num, alpha, min_samples, ena
             enable_quantity_skew,
             quantity_skew_beta,
         )
-        if min_samples <= 0 or min(len(items) for items in assignments) >= min_samples:
+        if min_samples <= 0 or min(len(items) for items in assignments) >= min_samples: #没最小标准或者所有项都达标
             return assignments
 
     raise ValueError(

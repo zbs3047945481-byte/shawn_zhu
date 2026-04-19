@@ -7,13 +7,19 @@ from pathlib import Path
 from statistics import mean, pstdev
 
 from plot_experiments import load_experiments
-from src.utils.plotting import plotting_available, save_comparison_plots
+from src.utils.plotting import plotting_available, save_ablation_summary_plot, save_comparison_plots
 
 
 SUITES = {
     'baseline_vs_plugin': [
         {'label': 'FedAvg', 'args': ['--plugin_name', 'none']},
         {'label': 'FedFedPrototype', 'args': ['--plugin_name', 'fedfed_prototype']},
+    ],
+    'fedavg_alpha_main': [
+        {'label': 'FedAvg_alpha_1.0', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '1.0']},
+        {'label': 'FedAvg_alpha_0.5', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.5']},
+        {'label': 'FedAvg_alpha_0.3', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.3']},
+        {'label': 'FedAvg_alpha_0.1', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.1']},
     ],
     'alpha_sweep': [
         {'label': 'alpha_1.0', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '1.0']},
@@ -60,6 +66,20 @@ SUITES = {
         {'label': 'FolderPlugin_default', 'args': ['--plugin_name', 'fedfed_prototype']},
         {'label': 'FolderPlugin_no_noise', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_noise_sigma', '0.0']},
     ],
+    'midterm_ablation_core': [
+        {'label': 'FedAvg', 'args': ['--plugin_name', 'none']},
+        {'label': 'Full_Method', 'args': ['--plugin_name', 'fedfed_prototype']},
+        {'label': 'No_Prototype_Sharing', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_prototype_sharing', 'false']},
+        {'label': 'No_Distill', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_distill', 'false']},
+        {'label': 'No_Projection', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_projection', 'false']},
+        {'label': 'No_Clip', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_clip', 'false']},
+    ],
+    'midterm_distill_focus': [
+        {'label': 'FedAvg', 'args': ['--plugin_name', 'none']},
+        {'label': 'Full_Method', 'args': ['--plugin_name', 'fedfed_prototype']},
+        {'label': 'No_Prototype_Sharing', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_prototype_sharing', 'false']},
+        {'label': 'No_Distill', 'args': ['--plugin_name', 'fedfed_prototype', '--fedfed_enable_distill', 'false']},
+    ],
 }
 
 
@@ -73,6 +93,7 @@ def parse_args():
     parser.add_argument('--batch_size', type=int, default=64, help='Local batch size.')
     parser.add_argument('--gpu', type=str, default='false', help='Whether to use GPU.')
     parser.add_argument('--dataset_name', type=str, default='mnist', help='Dataset name.')
+    parser.add_argument('--dirichlet_alpha', type=float, default=0.3, help='Dirichlet alpha used in shared base settings.')
     parser.add_argument('--seed', type=int, default=3001, help='Base random seed.')
     parser.add_argument('--num_repeats', type=int, default=1, help='How many random-seed repeats to run for each configuration.')
     parser.add_argument('--output_root', type=str, default='result/suites', help='Output folder for suite-level comparisons.')
@@ -90,6 +111,7 @@ def build_base_args(args):
         '--gpu', args.gpu,
         '--dataset_name', args.dataset_name,
         '--partition_strategy', 'dirichlet',
+        '--dirichlet_alpha', str(args.dirichlet_alpha),
         '--enable_quantity_skew', 'true',
         '--enable_feature_skew', 'true',
     ]
@@ -142,6 +164,12 @@ def run_suite(args):
     experiments = load_experiments(metrics_paths, labels)
     save_comparison_plots(experiments, str(suite_output_dir))
     save_suite_summary(args.suite, experiments, metrics_paths, suite_output_dir, repeated_results)
+    if args.suite == 'midterm_ablation_six':
+        save_ablation_summary_plot(
+            repeated_results,
+            str(suite_output_dir / 'midterm_ablation_summary.png'),
+            title='Midterm Six-Way Ablation',
+        )
     print('Saved suite outputs to {}'.format(suite_output_dir))
 
 

@@ -1,0 +1,353 @@
+{"kind":"deck","slideCount":7,"slideSize":{"width":1280,"height":720}}
+{"kind":"slide","slide":1,"id":"7w3vdk"}
+{"kind":"slide","slide":2,"id":"74g3km"}
+{"kind":"slide","slide":3,"id":"5qgf8b"}
+{"kind":"slide","slide":4,"id":"342xa9"}
+{"kind":"slide","slide":5,"id":"nguco8"}
+{"kind":"slide","slide":6,"id":"khdabn"}
+{"kind":"slide","slide":7,"id":"0di94m"}
+{"kind":"shape","slide":1,"id":"2","role":"cover panel","bbox":[56,60,1168,600]}
+{"kind":"shape","slide":1,"id":"3","role":"cover accent","bbox":[56,60,12,600]}
+{"kind":"shape","slide":1,"id":"4","role":"cover kicker","bbox":[94,102,220,24]}
+{"kind":"textbox","slide":1,"id":"4","role":"cover kicker","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[94,102,220,24]}
+{"kind":"shape","slide":1,"id":"5","role":"cover title","bbox":[92,156,520,138]}
+{"kind":"textbox","slide":1,"id":"5","role":"cover title","text":"联邦学习中特征蒸馏\n即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏 | 即插即用模块设计与实现","textLines":2,"bbox":[92,156,520,138]}
+{"kind":"shape","slide":1,"id":"6","role":"cover subtitle","bbox":[94,314,460,92]}
+{"kind":"textbox","slide":1,"id":"6","role":"cover subtitle","text":"围绕非 IID 数据构造、插件化架构、类别原型共享与特征蒸馏约束，完成从理论分析到系统实现的过渡。","textPreview":"围绕非 IID 数据构造、插件化架构、类别原型共享与特征蒸馏约束，完成从理论分析到系统实现的过渡。","textLines":1,"bbox":[94,314,460,92]}
+{"kind":"shape","slide":1,"id":"7","role":"tag","bbox":[94,454,116,34]}
+{"kind":"shape","slide":1,"id":"8","role":"tag text","bbox":[94,462,116,18]}
+{"kind":"textbox","slide":1,"id":"8","role":"tag text","text":"非IID构造","textPreview":"非IID构造","textLines":1,"bbox":[94,462,116,18]}
+{"kind":"shape","slide":1,"id":"9","role":"tag","bbox":[222,454,116,34]}
+{"kind":"shape","slide":1,"id":"10","role":"tag text","bbox":[222,462,116,18]}
+{"kind":"textbox","slide":1,"id":"10","role":"tag text","text":"插件化设计","textPreview":"插件化设计","textLines":1,"bbox":[222,462,116,18]}
+{"kind":"shape","slide":1,"id":"11","role":"tag","bbox":[350,454,116,34]}
+{"kind":"shape","slide":1,"id":"12","role":"tag text","bbox":[350,462,116,18]}
+{"kind":"textbox","slide":1,"id":"12","role":"tag text","text":"原型蒸馏","textPreview":"原型蒸馏","textLines":1,"bbox":[350,462,116,18]}
+{"kind":"shape","slide":1,"id":"13","role":"tag","bbox":[478,454,116,34]}
+{"kind":"shape","slide":1,"id":"14","role":"tag text","bbox":[478,462,116,18]}
+{"kind":"textbox","slide":1,"id":"14","role":"tag text","text":"联合优化","textPreview":"联合优化","textLines":1,"bbox":[478,462,116,18]}
+{"kind":"shape","slide":1,"id":"15","role":"cover note","bbox":[94,528,520,24]}
+{"kind":"textbox","slide":1,"id":"15","role":"cover note","text":"汇报内容：阶段目标、已完成工作、关键问题与拟解决方法","textPreview":"汇报内容：阶段目标、已完成工作、关键问题与拟解决方法","textLines":1,"bbox":[94,528,520,24]}
+{"kind":"shape","slide":1,"id":"16","role":"image panel 非IID 划分机制","bbox":[700,108,470,164]}
+{"kind":"image","slide":1,"id":"17","role":"非IID 划分机制","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image1.png","bbox":[710,118,450,110]}
+{"kind":"shape","slide":1,"id":"18","role":"image caption","bbox":[714,244,442,18]}
+{"kind":"textbox","slide":1,"id":"18","role":"image caption","text":"非IID 划分机制","textPreview":"非IID 划分机制","textLines":1,"bbox":[714,244,442,18]}
+{"kind":"shape","slide":1,"id":"19","role":"image panel 插件注册与工厂入口","bbox":[700,292,220,292]}
+{"kind":"image","slide":1,"id":"20","role":"插件注册与工厂入口","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image4.png","bbox":[710,302,200,238]}
+{"kind":"shape","slide":1,"id":"21","role":"image caption","bbox":[714,556,192,18]}
+{"kind":"textbox","slide":1,"id":"21","role":"image caption","text":"插件注册与工厂入口","textPreview":"插件注册与工厂入口","textLines":1,"bbox":[714,556,192,18]}
+{"kind":"shape","slide":1,"id":"22","role":"image panel 特征共享的裁剪与加噪","bbox":[940,292,230,292]}
+{"kind":"image","slide":1,"id":"23","role":"特征共享的裁剪与加噪","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image7.png","bbox":[950,302,210,238]}
+{"kind":"shape","slide":1,"id":"24","role":"image caption","bbox":[954,556,202,18]}
+{"kind":"textbox","slide":1,"id":"24","role":"image caption","text":"特征共享的裁剪与加噪","textPreview":"特征共享的裁剪与加噪","textLines":1,"bbox":[954,556,202,18]}
+{"kind":"shape","slide":2,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":2,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":2,"id":"3","role":"header","text":"第一部分 任务目标","textPreview":"第一部分 任务目标","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":2,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":2,"id":"4","role":"header","text":"02 / 07","textPreview":"02 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":2,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":2,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":2,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":2,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":2,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":2,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":2,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":2,"id":"9","role":"title","text":"本阶段目标与任务要求","textPreview":"本阶段目标与任务要求","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":2,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":2,"id":"10","role":"subtitle","text":"本阶段重点是把论文设想落实为可运行系统，并为后续实验验证建立可扩展的工程基础。","textPreview":"本阶段重点是把论文设想落实为可运行系统，并为后续实验验证建立可扩展的工程基础。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":2,"id":"11","role":"card 研究目标","bbox":[64,250,360,150]}
+{"kind":"shape","slide":2,"id":"12","role":"card accent 研究目标","bbox":[64,250,8,150]}
+{"kind":"shape","slide":2,"id":"13","role":"card label","bbox":[88,270,312,24]}
+{"kind":"textbox","slide":2,"id":"13","role":"card label","text":"研究目标","textPreview":"研究目标","textLines":1,"bbox":[88,270,312,24]}
+{"kind":"shape","slide":2,"id":"14","role":"card body","bbox":[88,306,312,78]}
+{"kind":"textbox","slide":2,"id":"14","role":"card body","text":"完成从理论分析向系统实现的过渡，形成完整可运行的联邦学习系统，并同步完成中期报告。","textPreview":"完成从理论分析向系统实现的过渡，形成完整可运行的联邦学习系统，并同步完成中期报告。","textLines":1,"bbox":[88,306,312,78]}
+{"kind":"shape","slide":2,"id":"15","role":"card 核心任务","bbox":[64,420,360,180]}
+{"kind":"shape","slide":2,"id":"16","role":"card accent 核心任务","bbox":[64,420,8,180]}
+{"kind":"shape","slide":2,"id":"17","role":"card label","bbox":[88,440,312,24]}
+{"kind":"textbox","slide":2,"id":"17","role":"card label","text":"核心任务","textPreview":"核心任务","textLines":1,"bbox":[88,440,312,24]}
+{"kind":"shape","slide":2,"id":"18","role":"card body","bbox":[88,476,312,108]}
+{"kind":"textbox","slide":2,"id":"18","role":"card body","text":"设计更贴近真实场景的非IID数据划分；实现中间特征低维投影；实现类别原型共享与特征蒸馏；完成模块集成。","textPreview":"设计更贴近真实场景的非IID数据划分；实现中间特征低维投影；实现类别原型共享与特征蒸馏；完成模块集成。","textLines":1,"bbox":[88,476,312,108]}
+{"kind":"shape","slide":2,"id":"19","role":"card 工程要求","bbox":[448,420,330,180]}
+{"kind":"shape","slide":2,"id":"20","role":"card accent 工程要求","bbox":[448,420,8,180]}
+{"kind":"shape","slide":2,"id":"21","role":"card label","bbox":[472,440,282,24]}
+{"kind":"textbox","slide":2,"id":"21","role":"card label","text":"工程要求","textPreview":"工程要求","textLines":1,"bbox":[472,440,282,24]}
+{"kind":"shape","slide":2,"id":"22","role":"card body","bbox":[472,476,282,108]}
+{"kind":"textbox","slide":2,"id":"22","role":"card body","text":"模块边界清晰、接口定义明确、代码结构规范，同时对现存问题进行分析与优化，为后续实验奠定基础。","textPreview":"模块边界清晰、接口定义明确、代码结构规范，同时对现存问题进行分析与优化，为后续实验奠定基础。","textLines":1,"bbox":[472,476,282,108]}
+{"kind":"shape","slide":2,"id":"23","role":"decor image panel","bbox":[802,420,364,180]}
+{"kind":"shape","slide":2,"id":"24","role":"decor title","bbox":[826,444,120,20]}
+{"kind":"textbox","slide":2,"id":"24","role":"decor title","text":"关键实现示意","textPreview":"关键实现示意","textLines":1,"bbox":[826,444,120,20]}
+{"kind":"image","slide":2,"id":"25","role":"decor image slide2","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image6.png","bbox":[822,478,324,100]}
+{"kind":"shape","slide":2,"id":"26","role":"decor note","bbox":[826,590,318,34]}
+{"kind":"textbox","slide":2,"id":"26","role":"decor note","text":"以代码级接口预留和主干训练流程为基础，为后续模块集成留出稳定入口。","textPreview":"以代码级接口预留和主干训练流程为基础，为后续模块集成留出稳定入口。","textLines":1,"bbox":[826,590,318,34]}
+{"kind":"shape","slide":2,"id":"27","role":"flow panel","bbox":[448,250,718,150]}
+{"kind":"shape","slide":2,"id":"28","role":"flow title","bbox":[474,274,180,20]}
+{"kind":"textbox","slide":2,"id":"28","role":"flow title","text":"阶段推进主线","textPreview":"阶段推进主线","textLines":1,"bbox":[474,274,180,20]}
+{"kind":"shape","slide":2,"id":"29","role":"stage 理论分析","bbox":[476,316,146,44]}
+{"kind":"shape","slide":2,"id":"30","role":"stage text","bbox":[476,327,146,18]}
+{"kind":"textbox","slide":2,"id":"30","role":"stage text","text":"理论分析","textPreview":"理论分析","textLines":1,"bbox":[476,327,146,18]}
+{"kind":"shape","slide":2,"id":"31","role":"stage arrow","bbox":[620,324,22,28]}
+{"kind":"shape","slide":2,"id":"32","role":"stage 系统实现","bbox":[646,316,146,44]}
+{"kind":"shape","slide":2,"id":"33","role":"stage text","bbox":[646,327,146,18]}
+{"kind":"textbox","slide":2,"id":"33","role":"stage text","text":"系统实现","textPreview":"系统实现","textLines":1,"bbox":[646,327,146,18]}
+{"kind":"shape","slide":2,"id":"34","role":"stage arrow","bbox":[790,324,22,28]}
+{"kind":"shape","slide":2,"id":"35","role":"stage 模块集成","bbox":[816,316,146,44]}
+{"kind":"shape","slide":2,"id":"36","role":"stage text","bbox":[816,327,146,18]}
+{"kind":"textbox","slide":2,"id":"36","role":"stage text","text":"模块集成","textPreview":"模块集成","textLines":1,"bbox":[816,327,146,18]}
+{"kind":"shape","slide":2,"id":"37","role":"stage arrow","bbox":[960,324,22,28]}
+{"kind":"shape","slide":2,"id":"38","role":"stage 实验准备","bbox":[986,316,146,44]}
+{"kind":"shape","slide":2,"id":"39","role":"stage text","bbox":[986,327,146,18]}
+{"kind":"textbox","slide":2,"id":"39","role":"stage text","text":"实验准备","textPreview":"实验准备","textLines":1,"bbox":[986,327,146,18]}
+{"kind":"shape","slide":3,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":3,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":3,"id":"3","role":"header","text":"第二部分 已完成情况","textPreview":"第二部分 已完成情况","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":3,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":3,"id":"4","role":"header","text":"03 / 07","textPreview":"03 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":3,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":3,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":3,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":3,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":3,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":3,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":3,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":3,"id":"9","role":"title","text":"当前已完成的关键工作","textPreview":"当前已完成的关键工作","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":3,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":3,"id":"10","role":"subtitle","text":"目前已经完成完整训练闭环、异构数据模拟、投影与原型机制、蒸馏与插件框架等关键实现。","textPreview":"目前已经完成完整训练闭环、异构数据模拟、投影与原型机制、蒸馏与插件框架等关键实现。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":3,"id":"11","role":"metric 已完成核心任务","bbox":[64,244,200,104]}
+{"kind":"shape","slide":3,"id":"12","role":"metric accent 已完成核心任务","bbox":[64,244,200,6]}
+{"kind":"shape","slide":3,"id":"13","role":"metric value","bbox":[84,262,160,34]}
+{"kind":"textbox","slide":3,"id":"13","role":"metric value","text":"8","textPreview":"8","textLines":1,"bbox":[84,262,160,34]}
+{"kind":"shape","slide":3,"id":"14","role":"metric label","bbox":[84,304,160,22]}
+{"kind":"textbox","slide":3,"id":"14","role":"metric label","text":"已完成核心任务","textPreview":"已完成核心任务","textLines":1,"bbox":[84,304,160,22]}
+{"kind":"shape","slide":3,"id":"15","role":"metric 第三部分待展开问题","bbox":[284,244,200,104]}
+{"kind":"shape","slide":3,"id":"16","role":"metric accent 第三部分待展开问题","bbox":[284,244,200,6]}
+{"kind":"shape","slide":3,"id":"17","role":"metric value","bbox":[304,262,160,34]}
+{"kind":"textbox","slide":3,"id":"17","role":"metric value","text":"4","textPreview":"4","textLines":1,"bbox":[304,262,160,34]}
+{"kind":"shape","slide":3,"id":"18","role":"metric label","bbox":[304,304,160,22]}
+{"kind":"textbox","slide":3,"id":"18","role":"metric label","text":"第三部分待展开问题","textPreview":"第三部分待展开问题","textLines":1,"bbox":[304,304,160,22]}
+{"kind":"shape","slide":3,"id":"19","role":"metric 完整联邦训练闭环","bbox":[504,244,180,104]}
+{"kind":"shape","slide":3,"id":"20","role":"metric accent 完整联邦训练闭环","bbox":[504,244,180,6]}
+{"kind":"shape","slide":3,"id":"21","role":"metric value","bbox":[524,262,140,34]}
+{"kind":"textbox","slide":3,"id":"21","role":"metric value","text":"1","textPreview":"1","textLines":1,"bbox":[524,262,140,34]}
+{"kind":"shape","slide":3,"id":"22","role":"metric label","bbox":[524,304,140,22]}
+{"kind":"textbox","slide":3,"id":"22","role":"metric label","text":"完整联邦训练闭环","textPreview":"完整联邦训练闭环","textLines":1,"bbox":[524,304,140,22]}
+{"kind":"shape","slide":3,"id":"23","role":"done left","bbox":[64,376,540,240]}
+{"kind":"shape","slide":3,"id":"24","role":"done right","bbox":[650,244,516,372]}
+{"kind":"shape","slide":3,"id":"25","role":"list title","bbox":[88,400,180,20]}
+{"kind":"textbox","slide":3,"id":"25","role":"list title","text":"系统与算法能力","textPreview":"系统与算法能力","textLines":1,"bbox":[88,400,180,20]}
+{"kind":"shape","slide":3,"id":"26","role":"list title","bbox":[674,268,180,20]}
+{"kind":"textbox","slide":3,"id":"26","role":"list title","text":"模块化与工程能力","textPreview":"模块化与工程能力","textLines":1,"bbox":[674,268,180,20]}
+{"kind":"shape","slide":3,"id":"27","role":"check bullet","bbox":[90,440,16,16]}
+{"kind":"shape","slide":3,"id":"28","role":"check glyph","bbox":[90,437,16,16]}
+{"kind":"textbox","slide":3,"id":"28","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[90,437,16,16]}
+{"kind":"shape","slide":3,"id":"29","role":"check item","bbox":[118,436,452,28]}
+{"kind":"textbox","slide":3,"id":"29","role":"check item","text":"构建了完整可运行的经典联邦学习训练流程","textPreview":"构建了完整可运行的经典联邦学习训练流程","textLines":1,"bbox":[118,436,452,28]}
+{"kind":"shape","slide":3,"id":"30","role":"check bullet","bbox":[90,482,16,16]}
+{"kind":"shape","slide":3,"id":"31","role":"check glyph","bbox":[90,479,16,16]}
+{"kind":"textbox","slide":3,"id":"31","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[90,479,16,16]}
+{"kind":"shape","slide":3,"id":"32","role":"check item","bbox":[118,478,452,28]}
+{"kind":"textbox","slide":3,"id":"32","role":"check item","text":"实现了多种数据异构场景的模拟能力","textPreview":"实现了多种数据异构场景的模拟能力","textLines":1,"bbox":[118,478,452,28]}
+{"kind":"shape","slide":3,"id":"33","role":"check bullet","bbox":[90,524,16,16]}
+{"kind":"shape","slide":3,"id":"34","role":"check glyph","bbox":[90,521,16,16]}
+{"kind":"textbox","slide":3,"id":"34","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[90,521,16,16]}
+{"kind":"shape","slide":3,"id":"35","role":"check item","bbox":[118,520,452,28]}
+{"kind":"textbox","slide":3,"id":"35","role":"check item","text":"实现了中间特征低维投影模块的独立设计","textPreview":"实现了中间特征低维投影模块的独立设计","textLines":1,"bbox":[118,520,452,28]}
+{"kind":"shape","slide":3,"id":"36","role":"check bullet","bbox":[90,566,16,16]}
+{"kind":"shape","slide":3,"id":"37","role":"check glyph","bbox":[90,563,16,16]}
+{"kind":"textbox","slide":3,"id":"37","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[90,563,16,16]}
+{"kind":"shape","slide":3,"id":"38","role":"check item","bbox":[118,562,452,28]}
+{"kind":"textbox","slide":3,"id":"38","role":"check item","text":"实现了按类别的特征原型提取、聚合与广播机制","textPreview":"实现了按类别的特征原型提取、聚合与广播机制","textLines":1,"bbox":[118,562,452,28]}
+{"kind":"shape","slide":3,"id":"39","role":"check bullet","bbox":[676,308,16,16]}
+{"kind":"shape","slide":3,"id":"40","role":"check glyph","bbox":[676,305,16,16]}
+{"kind":"textbox","slide":3,"id":"40","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[676,305,16,16]}
+{"kind":"shape","slide":3,"id":"41","role":"check item","bbox":[704,304,422,28]}
+{"kind":"textbox","slide":3,"id":"41","role":"check item","text":"引入了特征共享中的隐私风险缓解与稳定性增强机制","textPreview":"引入了特征共享中的隐私风险缓解与稳定性增强机制","textLines":1,"bbox":[704,304,422,28]}
+{"kind":"shape","slide":3,"id":"42","role":"check bullet","bbox":[676,362,16,16]}
+{"kind":"shape","slide":3,"id":"43","role":"check glyph","bbox":[676,359,16,16]}
+{"kind":"textbox","slide":3,"id":"43","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[676,359,16,16]}
+{"kind":"shape","slide":3,"id":"44","role":"check item","bbox":[704,358,422,28]}
+{"kind":"textbox","slide":3,"id":"44","role":"check item","text":"设计并实现了基于特征空间的蒸馏机制","textPreview":"设计并实现了基于特征空间的蒸馏机制","textLines":1,"bbox":[704,358,422,28]}
+{"kind":"shape","slide":3,"id":"45","role":"check bullet","bbox":[676,416,16,16]}
+{"kind":"shape","slide":3,"id":"46","role":"check glyph","bbox":[676,413,16,16]}
+{"kind":"textbox","slide":3,"id":"46","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[676,413,16,16]}
+{"kind":"shape","slide":3,"id":"47","role":"check item","bbox":[704,412,422,28]}
+{"kind":"textbox","slide":3,"id":"47","role":"check item","text":"实现了分类损失与蒸馏损失的联合优化机制","textPreview":"实现了分类损失与蒸馏损失的联合优化机制","textLines":1,"bbox":[704,412,422,28]}
+{"kind":"shape","slide":3,"id":"48","role":"check bullet","bbox":[676,470,16,16]}
+{"kind":"shape","slide":3,"id":"49","role":"check glyph","bbox":[676,467,16,16]}
+{"kind":"textbox","slide":3,"id":"49","role":"check glyph","text":"✓","textPreview":"✓","textLines":1,"bbox":[676,467,16,16]}
+{"kind":"shape","slide":3,"id":"50","role":"check item","bbox":[704,466,422,28]}
+{"kind":"textbox","slide":3,"id":"50","role":"check item","text":"实现了模块化的插件式扩展机制","textPreview":"实现了模块化的插件式扩展机制","textLines":1,"bbox":[704,466,422,28]}
+{"kind":"shape","slide":3,"id":"51","role":"summary note","bbox":[674,536,430,48]}
+{"kind":"textbox","slide":3,"id":"51","role":"summary note","text":"整体上，系统已具备“主干联邦训练 + 可插拔增强模块 + 原型蒸馏约束”的基本研究平台形态。","textPreview":"整体上，系统已具备“主干联邦训练 + 可插拔增强模块 + 原型蒸馏约束”的基本研究平台形态。","textLines":1,"bbox":[674,536,430,48]}
+{"kind":"image","slide":3,"id":"52","role":"decor image slide3","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image6.png","bbox":[1012,516,126,78]}
+{"kind":"shape","slide":4,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":4,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":4,"id":"3","role":"header","text":"第三部分 存在的问题与拟解决方法","textPreview":"第三部分 存在的问题与拟解决方法","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":4,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":4,"id":"4","role":"header","text":"04 / 07","textPreview":"04 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":4,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":4,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":4,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":4,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":4,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":4,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":4,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":4,"id":"9","role":"title","text":"（一）如何构造更贴近真实场景的非IID数据划分方式","textPreview":"（一）如何构造更贴近真实场景的非IID数据划分方式","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":4,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":4,"id":"10","role":"subtitle","text":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textPreview":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":4,"id":"11","role":"card 问题本质","bbox":[64,236,388,122]}
+{"kind":"shape","slide":4,"id":"12","role":"card accent 问题本质","bbox":[64,236,8,122]}
+{"kind":"shape","slide":4,"id":"13","role":"card label","bbox":[88,256,340,24]}
+{"kind":"textbox","slide":4,"id":"13","role":"card label","text":"问题本质","textPreview":"问题本质","textLines":1,"bbox":[88,256,340,24]}
+{"kind":"shape","slide":4,"id":"14","role":"card body","bbox":[88,292,340,50]}
+{"kind":"textbox","slide":4,"id":"14","role":"card body","text":"简单随机划分难以体现真实异构性；过度极端的划分又会导致部分客户端样本过少，训练过程不稳定。","textPreview":"简单随机划分难以体现真实异构性；过度极端的划分又会导致部分客户端样本过少，训练过程不稳定。","textLines":1,"bbox":[88,292,340,50]}
+{"kind":"shape","slide":4,"id":"15","role":"card 拟解决方法","bbox":[64,376,388,122]}
+{"kind":"shape","slide":4,"id":"16","role":"card accent 拟解决方法","bbox":[64,376,8,122]}
+{"kind":"shape","slide":4,"id":"17","role":"card label","bbox":[88,396,340,24]}
+{"kind":"textbox","slide":4,"id":"17","role":"card label","text":"拟解决方法","textPreview":"拟解决方法","textLines":1,"bbox":[88,396,340,24]}
+{"kind":"shape","slide":4,"id":"18","role":"card body","bbox":[88,432,340,50]}
+{"kind":"textbox","slide":4,"id":"18","role":"card body","text":"采用 Dirichlet 分布联合控制数量偏斜与标签偏斜，并在输入侧额外模拟特征异构；同时加入最小样本约束与重试机制。","textPreview":"采用 Dirichlet 分布联合控制数量偏斜与标签偏斜，并在输入侧额外模拟特征异构；同时加入最小样本约束与重试机制。","textLines":1,"bbox":[88,432,340,50]}
+{"kind":"shape","slide":4,"id":"19","role":"card 当前价值","bbox":[64,516,388,122]}
+{"kind":"shape","slide":4,"id":"20","role":"card accent 当前价值","bbox":[64,516,8,122]}
+{"kind":"shape","slide":4,"id":"21","role":"card label","bbox":[88,536,340,24]}
+{"kind":"textbox","slide":4,"id":"21","role":"card label","text":"当前价值","textPreview":"当前价值","textLines":1,"bbox":[88,536,340,24]}
+{"kind":"shape","slide":4,"id":"22","role":"card body","bbox":[88,572,340,50]}
+{"kind":"textbox","slide":4,"id":"22","role":"card body","text":"数据环境同时覆盖数量、类别与特征三类差异，能更真实地支撑后续特征蒸馏效果验证。","textPreview":"数据环境同时覆盖数量、类别与特征三类差异，能更真实地支撑后续特征蒸馏效果验证。","textLines":1,"bbox":[88,572,340,50]}
+{"kind":"shape","slide":4,"id":"23","role":"image region","bbox":[482,236,734,402]}
+{"kind":"shape","slide":4,"id":"24","role":"image panel 图1 客户端样本数量与类别差异模拟","bbox":[500,254,340,168]}
+{"kind":"image","slide":4,"id":"25","role":"图1 客户端样本数量与类别差异模拟","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image1.png","bbox":[510,264,320,114]}
+{"kind":"shape","slide":4,"id":"26","role":"image caption","bbox":[514,394,312,18]}
+{"kind":"textbox","slide":4,"id":"26","role":"image caption","text":"图1 客户端样本数量与类别差异模拟","textPreview":"图1 客户端样本数量与类别差异模拟","textLines":1,"bbox":[514,394,312,18]}
+{"kind":"shape","slide":4,"id":"27","role":"image panel 图2 特征异构构造","bbox":[854,254,344,168]}
+{"kind":"image","slide":4,"id":"28","role":"图2 特征异构构造","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image2.png","bbox":[864,264,324,114]}
+{"kind":"shape","slide":4,"id":"29","role":"image caption","bbox":[868,394,316,18]}
+{"kind":"textbox","slide":4,"id":"29","role":"image caption","text":"图2 特征异构构造","textPreview":"图2 特征异构构造","textLines":1,"bbox":[868,394,316,18]}
+{"kind":"shape","slide":4,"id":"30","role":"image panel 图3 最小样本约束与重试机制","bbox":[500,438,698,182]}
+{"kind":"image","slide":4,"id":"31","role":"图3 最小样本约束与重试机制","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image3.png","bbox":[510,448,678,128]}
+{"kind":"shape","slide":4,"id":"32","role":"image caption","bbox":[514,592,670,18]}
+{"kind":"textbox","slide":4,"id":"32","role":"image caption","text":"图3 最小样本约束与重试机制","textPreview":"图3 最小样本约束与重试机制","textLines":1,"bbox":[514,592,670,18]}
+{"kind":"shape","slide":5,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":5,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":5,"id":"3","role":"header","text":"第三部分 存在的问题与拟解决方法","textPreview":"第三部分 存在的问题与拟解决方法","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":5,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":5,"id":"4","role":"header","text":"05 / 07","textPreview":"05 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":5,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":5,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":5,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":5,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":5,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":5,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":5,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":5,"id":"9","role":"title","text":"（二）如何在不破坏联邦学习主干流程的前提下实现即插即用","textPreview":"（二）如何在不破坏联邦学习主干流程的前提下实现即插即用","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":5,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":5,"id":"10","role":"subtitle","text":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textPreview":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":5,"id":"11","role":"card 问题本质","bbox":[64,236,388,122]}
+{"kind":"shape","slide":5,"id":"12","role":"card accent 问题本质","bbox":[64,236,8,122]}
+{"kind":"shape","slide":5,"id":"13","role":"card label","bbox":[88,256,340,24]}
+{"kind":"textbox","slide":5,"id":"13","role":"card label","text":"问题本质","textPreview":"问题本质","textLines":1,"bbox":[88,256,340,24]}
+{"kind":"shape","slide":5,"id":"14","role":"card body","bbox":[88,292,340,50]}
+{"kind":"textbox","slide":5,"id":"14","role":"card body","text":"如果把蒸馏逻辑直接耦合进客户端、服务端与通信流程，虽然可快速实现，但会破坏主干清晰性并降低复用能力。","textPreview":"如果把蒸馏逻辑直接耦合进客户端、服务端与通信流程，虽然可快速实现，但会破坏主干清晰性并降低复用能力。","textLines":1,"bbox":[88,292,340,50]}
+{"kind":"shape","slide":5,"id":"15","role":"card 拟解决方法","bbox":[64,376,388,122]}
+{"kind":"shape","slide":5,"id":"16","role":"card accent 拟解决方法","bbox":[64,376,8,122]}
+{"kind":"shape","slide":5,"id":"17","role":"card label","bbox":[88,396,340,24]}
+{"kind":"textbox","slide":5,"id":"17","role":"card label","text":"拟解决方法","textPreview":"拟解决方法","textLines":1,"bbox":[88,396,340,24]}
+{"kind":"shape","slide":5,"id":"18","role":"card body","bbox":[88,432,340,50]}
+{"kind":"textbox","slide":5,"id":"18","role":"card body","text":"采用插件化设计，将特征蒸馏相关逻辑从主流程中抽离，通过注册表、工厂函数以及客户端/服务端植入点实现按需加载。","textPreview":"采用插件化设计，将特征蒸馏相关逻辑从主流程中抽离，通过注册表、工厂函数以及客户端/服务端植入点实现按需加载。","textLines":1,"bbox":[88,432,340,50]}
+{"kind":"shape","slide":5,"id":"19","role":"card 当前价值","bbox":[64,516,388,122]}
+{"kind":"shape","slide":5,"id":"20","role":"card accent 当前价值","bbox":[64,516,8,122]}
+{"kind":"shape","slide":5,"id":"21","role":"card label","bbox":[88,536,340,24]}
+{"kind":"textbox","slide":5,"id":"21","role":"card label","text":"当前价值","textPreview":"当前价值","textLines":1,"bbox":[88,536,340,24]}
+{"kind":"shape","slide":5,"id":"22","role":"card body","bbox":[88,572,340,50]}
+{"kind":"textbox","slide":5,"id":"22","role":"card body","text":"主干负责时序控制，增强模块只在关键节点接入，从而实现结构稳定、扩展灵活、迁移成本低的工程方案。","textPreview":"主干负责时序控制，增强模块只在关键节点接入，从而实现结构稳定、扩展灵活、迁移成本低的工程方案。","textLines":1,"bbox":[88,572,340,50]}
+{"kind":"shape","slide":5,"id":"23","role":"image region","bbox":[482,236,734,402]}
+{"kind":"shape","slide":5,"id":"24","role":"image panel 图4 插件注册表与工厂入口","bbox":[500,254,228,184]}
+{"kind":"image","slide":5,"id":"25","role":"图4 插件注册表与工厂入口","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image4.png","bbox":[510,264,208,130]}
+{"kind":"shape","slide":5,"id":"26","role":"image caption","bbox":[514,410,200,18]}
+{"kind":"textbox","slide":5,"id":"26","role":"image caption","text":"图4 插件注册表与工厂入口","textPreview":"图4 插件注册表与工厂入口","textLines":1,"bbox":[514,410,200,18]}
+{"kind":"shape","slide":5,"id":"27","role":"image panel 图5 服务端插件植入点","bbox":[742,254,456,184]}
+{"kind":"image","slide":5,"id":"28","role":"图5 服务端插件植入点","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image5.png","bbox":[752,264,436,130]}
+{"kind":"shape","slide":5,"id":"29","role":"image caption","bbox":[756,410,428,18]}
+{"kind":"textbox","slide":5,"id":"29","role":"image caption","text":"图5 服务端插件植入点","textPreview":"图5 服务端插件植入点","textLines":1,"bbox":[756,410,428,18]}
+{"kind":"shape","slide":5,"id":"30","role":"image panel 图6 客户端插件植入点","bbox":[500,454,698,166]}
+{"kind":"image","slide":5,"id":"31","role":"图6 客户端插件植入点","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image6.png","bbox":[510,464,678,112]}
+{"kind":"shape","slide":5,"id":"32","role":"image caption","bbox":[514,592,670,18]}
+{"kind":"textbox","slide":5,"id":"32","role":"image caption","text":"图6 客户端插件植入点","textPreview":"图6 客户端插件植入点","textLines":1,"bbox":[514,592,670,18]}
+{"kind":"shape","slide":6,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":6,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":6,"id":"3","role":"header","text":"第三部分 存在的问题与拟解决方法","textPreview":"第三部分 存在的问题与拟解决方法","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":6,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":6,"id":"4","role":"header","text":"06 / 07","textPreview":"06 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":6,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":6,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":6,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":6,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":6,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":6,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":6,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":6,"id":"9","role":"title","text":"（三）如何实现特征共享过程中的隐私风险缓解与稳定性增强机制","textPreview":"（三）如何实现特征共享过程中的隐私风险缓解与稳定性增强机制","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":6,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":6,"id":"10","role":"subtitle","text":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textPreview":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":6,"id":"11","role":"card 问题本质","bbox":[64,236,388,122]}
+{"kind":"shape","slide":6,"id":"12","role":"card accent 问题本质","bbox":[64,236,8,122]}
+{"kind":"shape","slide":6,"id":"13","role":"card label","bbox":[88,256,340,24]}
+{"kind":"textbox","slide":6,"id":"13","role":"card label","text":"问题本质","textPreview":"问题本质","textLines":1,"bbox":[88,256,340,24]}
+{"kind":"shape","slide":6,"id":"14","role":"card body","bbox":[88,292,340,50]}
+{"kind":"textbox","slide":6,"id":"14","role":"card body","text":"类别原型等中间特征包含语义信息，直接上传会放大隐私泄露风险；同时不同客户端特征幅值差异也会影响聚合稳定性。","textPreview":"类别原型等中间特征包含语义信息，直接上传会放大隐私泄露风险；同时不同客户端特征幅值差异也会影响聚合稳定性。","textLines":1,"bbox":[88,292,340,50]}
+{"kind":"shape","slide":6,"id":"15","role":"card 拟解决方法","bbox":[64,376,388,122]}
+{"kind":"shape","slide":6,"id":"16","role":"card accent 拟解决方法","bbox":[64,376,8,122]}
+{"kind":"shape","slide":6,"id":"17","role":"card label","bbox":[88,396,340,24]}
+{"kind":"textbox","slide":6,"id":"17","role":"card label","text":"拟解决方法","textPreview":"拟解决方法","textLines":1,"bbox":[88,396,340,24]}
+{"kind":"shape","slide":6,"id":"18","role":"card body","bbox":[88,432,340,50]}
+{"kind":"textbox","slide":6,"id":"18","role":"card body","text":"在客户端共享原型前先做范数裁剪，再在裁剪后的特征上加入随机高斯噪声，以抑制异常特征并降低精确暴露风险。","textPreview":"在客户端共享原型前先做范数裁剪，再在裁剪后的特征上加入随机高斯噪声，以抑制异常特征并降低精确暴露风险。","textLines":1,"bbox":[88,432,340,50]}
+{"kind":"shape","slide":6,"id":"19","role":"card 当前价值","bbox":[64,516,388,122]}
+{"kind":"shape","slide":6,"id":"20","role":"card accent 当前价值","bbox":[64,516,8,122]}
+{"kind":"shape","slide":6,"id":"21","role":"card label","bbox":[88,536,340,24]}
+{"kind":"textbox","slide":6,"id":"21","role":"card label","text":"当前价值","textPreview":"当前价值","textLines":1,"bbox":[88,536,340,24]}
+{"kind":"shape","slide":6,"id":"22","role":"card body","bbox":[88,572,340,50]}
+{"kind":"textbox","slide":6,"id":"22","role":"card body","text":"通过“先裁剪、后加噪”的机制，在不破坏蒸馏流程的前提下增强特征共享的安全性、鲁棒性与可控性。","textPreview":"通过“先裁剪、后加噪”的机制，在不破坏蒸馏流程的前提下增强特征共享的安全性、鲁棒性与可控性。","textLines":1,"bbox":[88,572,340,50]}
+{"kind":"shape","slide":6,"id":"23","role":"image region","bbox":[482,236,734,402]}
+{"kind":"shape","slide":6,"id":"24","role":"image panel 图7 原型共享前的裁剪与加噪机制","bbox":[500,254,698,366]}
+{"kind":"image","slide":6,"id":"25","role":"图7 原型共享前的裁剪与加噪机制","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image7.png","bbox":[510,264,678,312]}
+{"kind":"shape","slide":6,"id":"26","role":"image caption","bbox":[514,592,670,18]}
+{"kind":"textbox","slide":6,"id":"26","role":"image caption","text":"图7 原型共享前的裁剪与加噪机制","textPreview":"图7 原型共享前的裁剪与加噪机制","textLines":1,"bbox":[514,592,670,18]}
+{"kind":"shape","slide":7,"id":"2","role":"header marker","bbox":[62,38,14,14]}
+{"kind":"shape","slide":7,"id":"3","role":"header","bbox":[86,32,360,20]}
+{"kind":"textbox","slide":7,"id":"3","role":"header","text":"第三部分 存在的问题与拟解决方法","textPreview":"第三部分 存在的问题与拟解决方法","textLines":1,"bbox":[86,32,360,20]}
+{"kind":"shape","slide":7,"id":"4","role":"header","bbox":[1120,32,100,20]}
+{"kind":"textbox","slide":7,"id":"4","role":"header","text":"07 / 07","textPreview":"07 / 07","textLines":1,"bbox":[1120,32,100,20]}
+{"kind":"shape","slide":7,"id":"5","role":"header rule","bbox":[64,62,1152,1.5]}
+{"kind":"shape","slide":7,"id":"6","role":"footer rule","bbox":[64,676,1152,1.5]}
+{"kind":"shape","slide":7,"id":"7","role":"footer","bbox":[64,686,520,16]}
+{"kind":"textbox","slide":7,"id":"7","role":"footer","text":"联邦学习中特征蒸馏即插即用模块设计与实现","textPreview":"联邦学习中特征蒸馏即插即用模块设计与实现","textLines":1,"bbox":[64,686,520,16]}
+{"kind":"shape","slide":7,"id":"8","role":"footer","bbox":[1020,686,196,16]}
+{"kind":"textbox","slide":7,"id":"8","role":"footer","text":"毕业设计中期报告","textPreview":"毕业设计中期报告","textLines":1,"bbox":[1020,686,196,16]}
+{"kind":"shape","slide":7,"id":"9","role":"title","bbox":[64,92,760,74]}
+{"kind":"textbox","slide":7,"id":"9","role":"title","text":"（四）如何利用特征蒸馏约束缓解客户端局部模型与全局目标之间的偏离","textPreview":"（四）如何利用特征蒸馏约束缓解客户端局部模型与全局目标之间的偏离","textLines":1,"bbox":[64,92,760,74]}
+{"kind":"shape","slide":7,"id":"10","role":"subtitle","bbox":[66,166,760,46]}
+{"kind":"textbox","slide":7,"id":"10","role":"subtitle","text":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textPreview":"统一采用“问题定义 - 解决思路 - 当前价值”结构呈现，并保留对应代码示意图。","textLines":1,"bbox":[66,166,760,46]}
+{"kind":"shape","slide":7,"id":"11","role":"card 问题本质","bbox":[64,236,388,122]}
+{"kind":"shape","slide":7,"id":"12","role":"card accent 问题本质","bbox":[64,236,8,122]}
+{"kind":"shape","slide":7,"id":"13","role":"card label","bbox":[88,256,340,24]}
+{"kind":"textbox","slide":7,"id":"13","role":"card label","text":"问题本质","textPreview":"问题本质","textLines":1,"bbox":[88,256,340,24]}
+{"kind":"shape","slide":7,"id":"14","role":"card body","bbox":[88,292,340,50]}
+{"kind":"textbox","slide":7,"id":"14","role":"card body","text":"非IID 场景下客户端更容易沿各自数据方向独立优化，导致局部更新彼此偏离，影响全局聚合后模型的一致性。","textPreview":"非IID 场景下客户端更容易沿各自数据方向独立优化，导致局部更新彼此偏离，影响全局聚合后模型的一致性。","textLines":1,"bbox":[88,292,340,50]}
+{"kind":"shape","slide":7,"id":"15","role":"card 拟解决方法","bbox":[64,376,388,122]}
+{"kind":"shape","slide":7,"id":"16","role":"card accent 拟解决方法","bbox":[64,376,8,122]}
+{"kind":"shape","slide":7,"id":"17","role":"card label","bbox":[88,396,340,24]}
+{"kind":"textbox","slide":7,"id":"17","role":"card label","text":"拟解决方法","textPreview":"拟解决方法","textLines":1,"bbox":[88,396,340,24]}
+{"kind":"shape","slide":7,"id":"18","role":"card body","bbox":[88,432,340,50]}
+{"kind":"textbox","slide":7,"id":"18","role":"card body","text":"在中间表示层构造本地类别原型，与服务器广播的全局类别原型计算蒸馏损失，并与分类损失联合优化。","textPreview":"在中间表示层构造本地类别原型，与服务器广播的全局类别原型计算蒸馏损失，并与分类损失联合优化。","textLines":1,"bbox":[88,432,340,50]}
+{"kind":"shape","slide":7,"id":"19","role":"card 当前价值","bbox":[64,516,388,122]}
+{"kind":"shape","slide":7,"id":"20","role":"card accent 当前价值","bbox":[64,516,8,122]}
+{"kind":"shape","slide":7,"id":"21","role":"card label","bbox":[88,536,340,24]}
+{"kind":"textbox","slide":7,"id":"21","role":"card label","text":"当前价值","textPreview":"当前价值","textLines":1,"bbox":[88,536,340,24]}
+{"kind":"shape","slide":7,"id":"22","role":"card body","bbox":[88,572,340,50]}
+{"kind":"textbox","slide":7,"id":"22","role":"card body","text":"模型既保留本地任务适应能力，又持续向联邦系统中的全局目标对齐，从而缓解强异构条件下的客户端漂移。","textPreview":"模型既保留本地任务适应能力，又持续向联邦系统中的全局目标对齐，从而缓解强异构条件下的客户端漂移。","textLines":1,"bbox":[88,572,340,50]}
+{"kind":"shape","slide":7,"id":"23","role":"image region","bbox":[482,236,734,402]}
+{"kind":"shape","slide":7,"id":"24","role":"image panel 图8 类别原型蒸馏损失计算","bbox":[500,254,698,166]}
+{"kind":"image","slide":7,"id":"25","role":"图8 类别原型蒸馏损失计算","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image8.png","bbox":[510,264,678,112]}
+{"kind":"shape","slide":7,"id":"26","role":"image caption","bbox":[514,392,670,18]}
+{"kind":"textbox","slide":7,"id":"26","role":"image caption","text":"图8 类别原型蒸馏损失计算","textPreview":"图8 类别原型蒸馏损失计算","textLines":1,"bbox":[514,392,670,18]}
+{"kind":"shape","slide":7,"id":"27","role":"image panel 图9 分类损失与蒸馏损失联合优化","bbox":[500,438,698,182]}
+{"kind":"image","slide":7,"id":"28","role":"图9 分类损失与蒸馏损失联合优化","path":"/Users/zhubingshuo/Desktop/plug-and-play-feature-distillation-fl/tmp/midreport_docx/word/media/image9.png","bbox":[510,448,678,128]}
+{"kind":"shape","slide":7,"id":"29","role":"image caption","bbox":[514,592,670,18]}
+{"kind":"textbox","slide":7,"id":"29","role":"image caption","text":"图9 分类损失与蒸馏损失联合优化","textPreview":"图9 分类损失与蒸馏损失联合优化","textLines":1,"bbox":[514,592,670,18]}

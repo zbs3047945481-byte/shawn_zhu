@@ -7,8 +7,6 @@ class FeatureSplitModule(nn.Module):
         super(FeatureSplitModule, self).__init__()
         self.feature_dim = feature_dim
         self.sensitive_dim = sensitive_dim
-        # Historical name is kept for compatibility, but the module is now a
-        # pure low-dimensional projection used for prototype distillation.
         self.proj_s = nn.Linear(feature_dim, sensitive_dim)
         self.norm = nn.LayerNorm(sensitive_dim)
 
