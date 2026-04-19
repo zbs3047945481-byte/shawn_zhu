@@ -4,6 +4,7 @@ import time
 import torch
 import copy
 from src.plugins import build_client_plugin
+from src.utils.tools import get_runtime_device
 criterion = F.cross_entropy
 
 
@@ -13,11 +14,11 @@ class BaseClient():
         self.id = id
         self.local_dataset = local_dataset
         self.model = model
-        # 如果请求使用 GPU 但 CUDA 不可用，则使用 CPU
-        self.gpu = options['gpu'] and torch.cuda.is_available()
+        self.device = get_runtime_device(options)
+        self.gpu = self.device.type != 'cpu'
         self.optimizer = optimizer
 
-        self.plugin = build_client_plugin(options, self.model, self.gpu)
+        self.plugin = build_client_plugin(options, self.model, self.device)
         self.plugin_payload = None
 
     def set_plugin_payload(self, payload):
@@ -61,7 +62,8 @@ class BaseClient():
         for epoch in range(options['local_epoch']):  #表示这个客户端会把自己的本地数据完整训练 local_epoch 遍。
             for X, y in localTrainDataLoader:
                 if self.gpu:
-                    X, y = X.cuda(), y.cuda()
+                    X = X.to(self.device)
+                    y = y.to(self.device)
                 if use_plugin:
                     pred, loss = self.plugin.train_batch(X, y)
                 else:

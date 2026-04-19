@@ -6,7 +6,7 @@ from torch.utils.data import TensorDataset
 from torch.utils.data import DataLoader
 import copy
 from src.utils.metrics import Metrics
-from src.utils.tools import apply_feature_skew, build_client_feature_skews
+from src.utils.tools import apply_feature_skew, build_client_feature_skews, get_runtime_device
 from src.plugins import build_server_plugin
 import torch.nn.functional as F
 criterion = F.cross_entropy
@@ -25,7 +25,8 @@ class BaseFederated(object):
         self.optimizer_builder = optimizer_builder
         if self.model_builder is None or self.optimizer_builder is None:
             raise ValueError('Both model_builder and optimizer_builder are required.')
-        self.gpu = options['gpu'] and torch.cuda.is_available()
+        self.device = get_runtime_device(options)
+        self.gpu = self.device.type != 'cpu'
         self.batch_size = options['batch_size']#batch_size=每轮训练用多少条样本
         self.num_round = options['round_num']#round_num=联邦学习总共训练多少轮
         self.per_round_c_fraction = options['c_fraction']#c_fraction=每轮训练用多少个客户端
@@ -36,7 +37,7 @@ class BaseFederated(object):
                               f'tn{len(self.clients)}'])#name=实验名称
         self.metrics = Metrics(options, self.clients, self.name)#初始化实验指标记录器
         self.latest_global_model = copy.deepcopy(self.get_model_parameters())#latest_global_model=最新全局模型
-        self.server_plugin = build_server_plugin(options, self.gpu)#根据配置创建服务器端插件。
+        self.server_plugin = build_server_plugin(options, self.device)#根据配置创建服务器端插件。
 
 
 #我这个 FedAvgTrainer 已经知道要用什么模型、什么优化器、哪些数据、哪些客户端划分规则了。
@@ -49,15 +50,16 @@ class BaseFederated(object):
 
     @staticmethod
     def move_model_to_gpu(model, options):
-        if options['gpu'] is True and torch.cuda.is_available():
-            device = 0
+        device = get_runtime_device(options)
+        model.to(device)
+        if device.type == 'cuda':
             torch.cuda.set_device(device)
-            # torch.backends.cudnn.enabled = True
-            model.cuda()
             print('>>> Use gpu on device {}'.format(device))
+        elif device.type == 'mps':
+            print('>>> Use Apple GPU via MPS')
         else:
             if options['gpu'] is True:
-                print('>>> GPU requested but CUDA not available, using CPU instead')
+                print('>>> GPU requested but no accelerator available, using CPU instead')
             else:
                 print('>>> Don not use gpu')
 
@@ -88,8 +90,7 @@ class BaseFederated(object):
         #从全局训练集里取出属于这个客户端的数据，对这个客户端的数据施加它专属的特征偏移
             local_train_label = train_label[local_indices]#取出这个客户端对应的标签。
             local_model = self.model_builder()#创建一个本地模型，这个模型是基于全局模型构建的，但是每个客户端的模型参数都是独立的。
-            if self.gpu:
-                local_model.cuda()
+            local_model.to(self.device)
             local_optimizer = self.optimizer_builder(local_model.parameters())#创建一个本地优化器，这个优化器是基于全局优化器构建的，但是每个客户端的优化器参数都是独立的。
     #优化器是“根据损失函数计算出来的梯度，去更新模型参数”的工具。
     #训练四步：1.模型前向计算，得到预测结果；2.根据预测和真实标签算出损失；3.反向传播得到每个参数怎么改；（优化器负责执行“改参数”这一步）
@@ -180,7 +181,8 @@ class BaseFederated(object):
         with torch.no_grad():
             for X, y in testDataLoader:
                 if self.gpu:
-                    X, y = X.cuda(), y.cuda()
+                    X = X.to(self.device)
+                    y = y.to(self.device)
                 pred = self.model(X)
                 loss = criterion(pred, y)
                 _, predicted = torch.max(pred, 1)

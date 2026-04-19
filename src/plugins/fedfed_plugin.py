@@ -10,11 +10,13 @@ mse_loss = nn.MSELoss()
 
 
 class FedFedClientPlugin(BaseClientPlugin):
-    def __init__(self, options, model, gpu):
+    def __init__(self, options, model, device):
         self.options = options
         self.model = model
-        self.gpu = gpu
+        self.device = device
+        self.gpu = device.type != 'cpu'
         self.global_prototypes = None
+        self.global_projection_state = None
         self.prototype_sums = {}
         self.prototype_counts = {}
 
@@ -28,8 +30,7 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.projection_module = None
         if self.enable_projection:
             self.projection_module = FeatureSplitModule(feature_dim, sensitive_dim)
-            if self.gpu:
-                self.projection_module.cuda()
+            self.projection_module.to(self.device)
 
         trainable_params = list(self.model.parameters())
         if self.projection_module is not None:
@@ -39,10 +40,19 @@ class FedFedClientPlugin(BaseClientPlugin):
     def on_round_start(self, learning_rate, server_payload):
         for group in self.optimizer.param_groups:
             group['lr'] = learning_rate
+        self.global_projection_state = None
+        if server_payload is not None:
+            self.global_projection_state = server_payload.get('projection_state')
         if self.enable_prototype_sharing:
             self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
         else:
-            self.global_prototypes = None
+                self.global_prototypes = None
+        if self.projection_module is not None and self.global_projection_state is not None:
+            projection_state = {
+                key: value.to(self.device)
+                for key, value in self.global_projection_state.items()
+            }
+            self.projection_module.load_state_dict(projection_state, strict=True)
         if self.projection_module is not None:
             self.projection_module.train()
         self.prototype_sums = {}
@@ -110,40 +120,65 @@ class FedFedClientPlugin(BaseClientPlugin):
                 self.prototype_counts[class_id] += class_count
 
     def build_upload_payload(self):
-        if not self.enable_prototype_sharing or not self.prototype_sums:
-            return None
-        local_prototypes = {}
-        for class_id, feature_sum in self.prototype_sums.items():
-            prototype = (feature_sum / self.prototype_counts[class_id]).unsqueeze(0)
-            prototype = self._clip_and_noise(prototype).squeeze(0)
-            local_prototypes[class_id] = {
-                'prototype': prototype.cpu(),
-                'count': self.prototype_counts[class_id],
+        payload = {}
+        if self.projection_module is not None:
+            payload['projection_state'] = {
+                key: value.detach().cpu().clone()
+                for key, value in self.projection_module.state_dict().items()
             }
-        return {'prototypes': local_prototypes}
+
+        if self.enable_prototype_sharing and self.prototype_sums:
+            local_prototypes = {}
+            for class_id, feature_sum in self.prototype_sums.items():
+                prototype = (feature_sum / self.prototype_counts[class_id]).unsqueeze(0)
+                prototype = self._clip_and_noise(prototype).squeeze(0)
+                local_prototypes[class_id] = {
+                    'prototype': prototype.cpu(),
+                    'count': self.prototype_counts[class_id],
+                }
+            payload['prototypes'] = local_prototypes
+
+        return payload or None
 
 
 class FedFedServerPlugin(BaseServerPlugin):
-    def __init__(self, options, gpu):
+    def __init__(self, options, device):
         self.options = options
-        self.gpu = gpu
+        self.device = device
+        self.gpu = device.type != 'cpu'
         self.enable_prototype_sharing = options.get('fedfed_enable_prototype_sharing', True)
         self.global_prototypes = None
+        self.global_projection_state = None
 
     def build_broadcast_payload(self):
-        if not self.enable_prototype_sharing or self.global_prototypes is None:
-            return None
-        return {'global_prototypes': self.global_prototypes}
+        payload = {}
+        if self.global_projection_state is not None:
+            payload['projection_state'] = self.global_projection_state
+        if self.enable_prototype_sharing and self.global_prototypes is not None:
+            payload['global_prototypes'] = self.global_prototypes
+        return payload or None
 
     def aggregate_client_payloads(self, local_model_paras_set):
-        if not self.enable_prototype_sharing:
-            self.global_prototypes = None
-            return
+        projection_sums = {}
+        projection_weight = 0
         prototype_sums = {}
         prototype_counts = {}
         for update in local_model_paras_set:
             aux = update.get('aux')
-            if aux is None or 'prototypes' not in aux:
+            if aux is None:
+                continue
+            num_sample = update['num_samples']
+            if 'projection_state' in aux:
+                if not projection_sums:
+                    projection_sums = {
+                        key: value.clone() * num_sample
+                        for key, value in aux['projection_state'].items()
+                    }
+                else:
+                    for key, value in aux['projection_state'].items():
+                        projection_sums[key] += value * num_sample
+                projection_weight += num_sample
+            if not self.enable_prototype_sharing or 'prototypes' not in aux:
                 continue
             for class_id, payload in aux['prototypes'].items():
                 prototype = payload['prototype']
@@ -155,10 +190,23 @@ class FedFedServerPlugin(BaseServerPlugin):
                     prototype_sums[class_id] += prototype * count
                     prototype_counts[class_id] += count
 
+        if projection_sums:
+            self.global_projection_state = {}
+            for key, weighted_sum in projection_sums.items():
+                averaged = weighted_sum / projection_weight
+                self.global_projection_state[key] = averaged.to(self.device)
+        else:
+            self.global_projection_state = None
+
+        if not self.enable_prototype_sharing:
+            self.global_prototypes = None
+            return
+
         if not prototype_sums:
+            self.global_prototypes = None
             return
 
         self.global_prototypes = {}
         for class_id, weighted_sum in prototype_sums.items():
             prototype = weighted_sum / prototype_counts[class_id]
-            self.global_prototypes[class_id] = prototype.cuda() if self.gpu else prototype
+            self.global_prototypes[class_id] = prototype.to(self.device)

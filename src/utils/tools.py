@@ -4,6 +4,26 @@ import numpy as np
 import torch
 
 
+def get_runtime_device(options=None):
+    options = options or {}
+    use_accelerator = bool(options.get('gpu', False))
+    if not use_accelerator:
+        return torch.device('cpu')
+    if torch.cuda.is_available():
+        return torch.device('cuda:0')
+    if getattr(torch.backends, 'mps', None) is not None and torch.backends.mps.is_available():
+        return torch.device('mps')
+    return torch.device('cpu')
+
+
+def accelerator_available():
+    if torch.cuda.is_available():
+        return True
+    if getattr(torch.backends, 'mps', None) is not None and torch.backends.mps.is_available():
+        return True
+    return False
+
+
 def set_random_seed(seed):
     random.seed(seed)
     np.random.seed(seed)
