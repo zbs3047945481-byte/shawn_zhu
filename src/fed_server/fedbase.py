@@ -116,6 +116,8 @@ class BaseFederated(object):
             client.set_model_parameters(self.latest_global_model)#把服务器当前保存的最新全局模型参数写入这个客户端的本地模型。
             client.set_learning_rate(self.optimizer.param_groups[0]['lr'])#把服务器当前记录的学习率发给客户端。
             if self.server_plugin is not None:
+                if hasattr(self.server_plugin, 'set_round_index'):
+                    self.server_plugin.set_round_index(round_i)
                 client.set_plugin_payload(self.server_plugin.build_broadcast_payload())#服务器额外信息下发。
             update, stat = client.local_train()
             local_model_paras_set.append(update)#本轮所有参与客户端的更新结果：模型参数+样本数+额外信息

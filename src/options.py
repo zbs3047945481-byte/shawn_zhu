@@ -116,15 +116,25 @@ def input_options():
                         help='Gaussian noise std for z_s (privacy).')
     parser.add_argument('--fedfed_lambda_distill', type=float, default=1.0,
                         help='Weight of feature distillation loss L_distill.')
+    parser.add_argument('--fedfed_distill_warmup_rounds', type=int, default=3,
+                        help='Warm up prototype distillation over the first few communication rounds.')
+    parser.add_argument('--fedfed_distill_count_tau', type=float, default=8.0,
+                        help='Reliability temperature for local/global class counts in prototype distillation.')
+    parser.add_argument('--fedfed_prototype_momentum', type=float, default=0.8,
+                        help='EMA momentum for server-side global prototype updates. Higher is smoother.')
+    parser.add_argument('--fedfed_use_cosine_distill', type=str2bool, default=True,
+                        help='Whether to align prototypes with cosine distance instead of raw MSE.')
+    parser.add_argument('--fedfed_normalize_prototypes', type=str2bool, default=True,
+                        help='Whether to L2-normalize prototypes before sharing and distillation.')
     parser.add_argument('--fedfed_enable_projection', type=str2bool, default=True,
                         help='Whether to use the low-dimensional projection module before prototype sharing.')
     parser.add_argument('--fedfed_enable_prototype_sharing', type=str2bool, default=True,
                         help='Whether to upload, aggregate, and broadcast class prototypes across clients.')
     parser.add_argument('--fedfed_enable_distill', type=str2bool, default=True,
                         help='Whether to apply prototype distillation loss during local training.')
-    parser.add_argument('--fedfed_enable_clip', type=str2bool, default=True,
+    parser.add_argument('--fedfed_enable_clip', type=str2bool, default=False,
                         help='Whether to clip prototype norm before upload.')
-    parser.add_argument('--fedfed_enable_noise', type=str2bool, default=True,
+    parser.add_argument('--fedfed_enable_noise', type=str2bool, default=False,
                         help='Whether to add Gaussian noise to uploaded prototypes.')
     
     args = parser.parse_args()

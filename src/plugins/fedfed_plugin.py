@@ -16,9 +16,11 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.device = device
         self.gpu = device.type != 'cpu'
         self.global_prototypes = None
+        self.global_prototype_counts = {}
         self.global_projection_state = None
         self.prototype_sums = {}
         self.prototype_counts = {}
+        self.current_round = 0
 
         feature_dim = options.get('fedfed_feature_dim', 512)
         sensitive_dim = options.get('fedfed_sensitive_dim', 64)
@@ -27,6 +29,8 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.enable_distill = options.get('fedfed_enable_distill', True)
         self.enable_clip = options.get('fedfed_enable_clip', True)
         self.enable_noise = options.get('fedfed_enable_noise', True)
+        self.use_cosine_distill = options.get('fedfed_use_cosine_distill', True)
+        self.normalize_prototypes = options.get('fedfed_normalize_prototypes', True)
         self.projection_module = None
         if self.enable_projection:
             self.projection_module = FeatureSplitModule(feature_dim, sensitive_dim)
@@ -41,12 +45,15 @@ class FedFedClientPlugin(BaseClientPlugin):
         for group in self.optimizer.param_groups:
             group['lr'] = learning_rate
         self.global_projection_state = None
+        self.global_prototype_counts = {}
         if server_payload is not None:
             self.global_projection_state = server_payload.get('projection_state')
+            self.current_round = int(server_payload.get('round_index', self.current_round))
         if self.enable_prototype_sharing:
             self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
+            self.global_prototype_counts = {} if server_payload is None else server_payload.get('global_prototype_counts', {})
         else:
-                self.global_prototypes = None
+            self.global_prototypes = None
         if self.projection_module is not None and self.global_projection_state is not None:
             projection_state = {
                 key: value.to(self.device)
@@ -70,24 +77,53 @@ class FedFedClientPlugin(BaseClientPlugin):
             feature = feature + noise_sigma * torch.randn_like(feature)
         return feature
 
+    def _normalize_prototype(self, prototype):
+        if not self.normalize_prototypes:
+            return prototype
+        return F.normalize(prototype, dim=-1)
+
+    def _count_reliability(self, count):
+        tau = float(self.options.get('fedfed_distill_count_tau', 8.0))
+        if tau <= 0:
+            return 1.0
+        return float(count) / (float(count) + tau)
+
+    def _distill_strength(self):
+        warmup_rounds = int(self.options.get('fedfed_distill_warmup_rounds', 0))
+        if warmup_rounds <= 0:
+            return float(self.options.get('fedfed_lambda_distill', 1.0))
+        progress = min(max(self.current_round, 0) / float(warmup_rounds), 1.0)
+        return float(self.options.get('fedfed_lambda_distill', 1.0)) * progress
 
     def _compute_prototype_distill_loss(self, z_s, y):
         if not self.enable_distill or not self.global_prototypes:
             return None
         prototype_losses = []
+        prototype_weights = []
         for label in y.unique():
             class_id = int(label.item())
-            if class_id not in self.global_prototypes: 
+            if class_id not in self.global_prototypes:
                 continue
             class_mask = (y == label)
+            class_count = int(class_mask.sum().item())
             local_proto = z_s[class_mask].mean(dim=0, keepdim=True)
             target_proto = self.global_prototypes[class_id].to(z_s.device).unsqueeze(0)
-            prototype_losses.append(mse_loss(local_proto, target_proto))
+            local_proto = self._normalize_prototype(local_proto)
+            target_proto = self._normalize_prototype(target_proto)
+            if self.use_cosine_distill:
+                loss_value = 1.0 - F.cosine_similarity(local_proto, target_proto, dim=-1).mean()
+            else:
+                loss_value = mse_loss(local_proto, target_proto)
+            global_count = self.global_prototype_counts.get(class_id, class_count)
+            reliability = self._count_reliability(class_count) * self._count_reliability(global_count)
+            prototype_losses.append(loss_value)
+            prototype_weights.append(loss_value.new_tensor(reliability))
 
         if not prototype_losses:
             return None
         loss_tensor = torch.stack(prototype_losses)
-        return loss_tensor.mean()
+        weight_tensor = torch.stack(prototype_weights).clamp(min=1e-6)
+        return (loss_tensor * weight_tensor).sum() / weight_tensor.sum()
 
     def train_batch(self, X, y):
         self.optimizer.zero_grad()
@@ -98,10 +134,10 @@ class FedFedClientPlugin(BaseClientPlugin):
 
         loss_distill = self._compute_prototype_distill_loss(z_s, y)
         if loss_distill is not None:
-            lambda_distill = self.options.get('fedfed_lambda_distill', 1.0)
+            lambda_distill = self._distill_strength()
             loss = loss_cls + lambda_distill * loss_distill
 
-        self._accumulate_batch_prototypes(z_s.detach(), y)
+        self._accumulate_batch_prototypes(self._normalize_prototype(z_s.detach()), y)
         loss.backward()
         self.optimizer.step()
         return pred, loss.detach()
@@ -131,6 +167,7 @@ class FedFedClientPlugin(BaseClientPlugin):
             local_prototypes = {}
             for class_id, feature_sum in self.prototype_sums.items():
                 prototype = (feature_sum / self.prototype_counts[class_id]).unsqueeze(0)
+                prototype = self._normalize_prototype(prototype)
                 prototype = self._clip_and_noise(prototype).squeeze(0)
                 local_prototypes[class_id] = {
                     'prototype': prototype.cpu(),
@@ -147,15 +184,29 @@ class FedFedServerPlugin(BaseServerPlugin):
         self.device = device
         self.gpu = device.type != 'cpu'
         self.enable_prototype_sharing = options.get('fedfed_enable_prototype_sharing', True)
+        self.normalize_prototypes = options.get('fedfed_normalize_prototypes', True)
+        self.prototype_momentum = float(options.get('fedfed_prototype_momentum', 0.8))
         self.global_prototypes = None
+        self.global_prototype_counts = {}
         self.global_projection_state = None
+        self.current_round = 0
+
+    def set_round_index(self, round_index):
+        self.current_round = int(round_index)
+
+    def _normalize_prototype(self, prototype):
+        if not self.normalize_prototypes:
+            return prototype
+        return F.normalize(prototype.unsqueeze(0), dim=-1).squeeze(0)
 
     def build_broadcast_payload(self):
         payload = {}
+        payload['round_index'] = self.current_round
         if self.global_projection_state is not None:
             payload['projection_state'] = self.global_projection_state
         if self.enable_prototype_sharing and self.global_prototypes is not None:
             payload['global_prototypes'] = self.global_prototypes
+            payload['global_prototype_counts'] = self.global_prototype_counts
         return payload or None
 
     def aggregate_client_payloads(self, local_model_paras_set):
@@ -200,13 +251,23 @@ class FedFedServerPlugin(BaseServerPlugin):
 
         if not self.enable_prototype_sharing:
             self.global_prototypes = None
+            self.global_prototype_counts = {}
             return
 
         if not prototype_sums:
-            self.global_prototypes = None
             return
 
-        self.global_prototypes = {}
+        updated_prototypes = dict(self.global_prototypes or {})
+        updated_counts = dict(self.global_prototype_counts or {})
         for class_id, weighted_sum in prototype_sums.items():
             prototype = weighted_sum / prototype_counts[class_id]
-            self.global_prototypes[class_id] = prototype.to(self.device)
+            prototype = self._normalize_prototype(prototype)
+            if class_id in updated_prototypes and self.prototype_momentum > 0:
+                prototype = self.prototype_momentum * updated_prototypes[class_id].to(prototype.device) + (
+                    1.0 - self.prototype_momentum
+                ) * prototype
+                prototype = self._normalize_prototype(prototype)
+            updated_prototypes[class_id] = prototype.to(self.device)
+            updated_counts[class_id] = prototype_counts[class_id]
+        self.global_prototypes = updated_prototypes
+        self.global_prototype_counts = updated_counts
