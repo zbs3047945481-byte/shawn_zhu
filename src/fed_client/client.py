@@ -54,7 +54,14 @@ class BaseClient():
 
     def local_update(self, local_dataset, options, ):
         use_plugin = self.plugin is not None
-        localTrainDataLoader = DataLoader(local_dataset, batch_size=options['batch_size'], shuffle=True)
+        pin_memory = self.gpu and options.get('dataloader_pin_memory', True)
+        localTrainDataLoader = DataLoader(
+            local_dataset,
+            batch_size=options['batch_size'],
+            shuffle=True,
+            num_workers=max(int(options.get('dataloader_num_workers', 0)), 0),
+            pin_memory=pin_memory,
+        )
         self.model.train() #把模型设置为训练模式
         if use_plugin:
             self.plugin.on_round_start(self.optimizer.param_groups[0]['lr'], self.plugin_payload)#正式训练前，先把插件状态准备好。
@@ -62,8 +69,8 @@ class BaseClient():
         for epoch in range(options['local_epoch']):  #表示这个客户端会把自己的本地数据完整训练 local_epoch 遍。
             for X, y in localTrainDataLoader:
                 if self.gpu:
-                    X = X.to(self.device)
-                    y = y.to(self.device)
+                    X = X.to(self.device, non_blocking=pin_memory)
+                    y = y.to(self.device, non_blocking=pin_memory)
                 if use_plugin:
                     pred, loss = self.plugin.train_batch(X, y)
                 else:

@@ -52,6 +52,12 @@ def input_options():
     #本地训练 batch size
     #每次梯度更新用多少条样本
     #比如有1000条数据，每轮训练只取100条数据来算梯度并更新参数，这100条数据叫一个batch
+    parser.add_argument('--dataloader_num_workers', type=int, default=2,
+                        help='Number of DataLoader worker processes.')
+    parser.add_argument('--dataloader_pin_memory', type=str2bool, default=True,
+                        help='Whether DataLoader should pin host memory when using GPU.')
+    parser.add_argument('--torch_cudnn_benchmark', type=str2bool, default=True,
+                        help='Enable cudnn benchmark for faster fixed-shape GPU training.')
 
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, \
                         use value from origin paper as default")

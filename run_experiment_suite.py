@@ -7,6 +7,7 @@ from pathlib import Path
 from statistics import mean, pstdev
 
 from plot_experiments import load_experiments
+from src.options import str2bool
 from src.utils.plotting import plotting_available, save_ablation_summary_plot, save_comparison_plots
 
 
@@ -51,6 +52,16 @@ SUITES = {
         {'label': 'Full_alpha_0.3_ep10', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.3', '--local_epoch', '10']},
         {'label': 'FedAvg_alpha_0.1_ep10', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.1', '--local_epoch', '10']},
         {'label': 'Full_alpha_0.1_ep10', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.1', '--local_epoch', '10']},
+    ],
+    'targeted_four_combo': [
+        {'label': 'FedAvg_alpha_0.3_ep1', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.3', '--local_epoch', '1']},
+        {'label': 'Full_alpha_0.3_ep1', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.3', '--local_epoch', '1']},
+        {'label': 'FedAvg_alpha_0.1_ep1', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.1', '--local_epoch', '1']},
+        {'label': 'Full_alpha_0.1_ep1', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.1', '--local_epoch', '1']},
+        {'label': 'FedAvg_alpha_0.3_ep5', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.3', '--local_epoch', '5']},
+        {'label': 'Full_alpha_0.3_ep5', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.3', '--local_epoch', '5']},
+        {'label': 'FedAvg_alpha_0.1_ep5', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.1', '--local_epoch', '5']},
+        {'label': 'Full_alpha_0.1_ep5', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '0.1', '--local_epoch', '5']},
     ],
     'alpha_sweep': [
         {'label': 'alpha_1.0', 'args': ['--plugin_name', 'fedfed_prototype', '--dirichlet_alpha', '1.0']},
@@ -122,7 +133,7 @@ def parse_args():
     parser.add_argument('--c_fraction', type=float, default=0.2, help='Fraction of clients per round.')
     parser.add_argument('--local_epoch', type=int, default=1, help='Local epochs.')
     parser.add_argument('--batch_size', type=int, default=64, help='Local batch size.')
-    parser.add_argument('--gpu', type=str, default='false', help='Whether to use GPU.')
+    parser.add_argument('--gpu', type=str2bool, default=True, help='Whether to use GPU.')
     parser.add_argument('--dataset_name', type=str, default='mnist', help='Dataset name.')
     parser.add_argument('--dirichlet_alpha', type=float, default=0.3, help='Dirichlet alpha used in shared base settings.')
     parser.add_argument('--seed', type=int, default=3001, help='Base random seed.')
@@ -139,7 +150,7 @@ def build_base_args(args):
         '--c_fraction', str(args.c_fraction),
         '--local_epoch', str(args.local_epoch),
         '--batch_size', str(args.batch_size),
-        '--gpu', args.gpu,
+        '--gpu', str(args.gpu).lower(),
         '--dataset_name', args.dataset_name,
         '--partition_strategy', 'dirichlet',
         '--dirichlet_alpha', str(args.dirichlet_alpha),

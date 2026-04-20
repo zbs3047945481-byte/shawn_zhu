@@ -178,13 +178,16 @@ class BaseFederated(object):
             ),
             batch_size=self.batch_size,
             shuffle=False,
+            num_workers=max(int(self.options.get('dataloader_num_workers', 0)), 0),
+            pin_memory=self.gpu and self.options.get('dataloader_pin_memory', True),
         )
         test_loss = test_acc = test_total = 0.
+        pin_memory = self.gpu and self.options.get('dataloader_pin_memory', True)
         with torch.no_grad():
             for X, y in testDataLoader:
                 if self.gpu:
-                    X = X.to(self.device)
-                    y = y.to(self.device)
+                    X = X.to(self.device, non_blocking=pin_memory)
+                    y = y.to(self.device, non_blocking=pin_memory)
                 pred = self.model(X)
                 loss = criterion(pred, y)
                 _, predicted = torch.max(pred, 1)

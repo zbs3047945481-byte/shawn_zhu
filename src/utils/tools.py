@@ -32,6 +32,12 @@ def set_random_seed(seed):
         torch.cuda.manual_seed_all(seed)
 
 
+def configure_runtime(options=None):
+    options = options or {}
+    if torch.cuda.is_available():
+        torch.backends.cudnn.benchmark = bool(options.get('torch_cudnn_benchmark', True))
+
+
 def resolve_heterogeneity_options(options=None):
     options = dict(options or {})
     if not options.get('unify_heterogeneity_alpha', False):
