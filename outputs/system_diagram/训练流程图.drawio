@@ -1,0 +1,88 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="training-flow" name="训练流程图">
+    <mxGraphModel dx="1483" dy="842" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;" value="单轮联邦训练流程图" vertex="1">
+          <mxGeometry height="50" width="580" x="460" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="start" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="开始实验&lt;br&gt;读取 options，设置 seed，加载数据集" vertex="1">
+          <mxGeometry height="80" width="260" x="620" y="95" as="geometry" />
+        </mxCell>
+        <mxCell id="partition" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="构造客户端数据划分&lt;br&gt;IID / Dirichlet Non-IID&lt;br&gt;数量偏斜 + 特征偏斜" vertex="1">
+          <mxGeometry height="90" width="280" x="610" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="init" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="初始化 FedAvgTrainer&lt;br&gt;创建全局模型、客户端、本地模型和插件" vertex="1">
+          <mxGeometry height="85" width="300" x="600" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="eval0" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=14;fontStyle=1;" value="轮初全局评估&lt;br&gt;test accuracy / loss" vertex="1">
+          <mxGeometry height="70" width="280" x="610" y="485" as="geometry" />
+        </mxCell>
+        <mxCell id="select" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="客户端采样&lt;br&gt;select_clients()" vertex="1">
+          <mxGeometry height="70" width="210" x="180" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="broadcast" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="服务端广播&lt;br&gt;全局模型参数&lt;br&gt;插件辅助信息" vertex="1">
+          <mxGeometry height="80" width="220" x="470" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="local" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" value="客户端本地训练&lt;br&gt;分类损失 + 原型蒸馏 + 特征锚定&lt;br&gt;local_epoch 个 epoch" vertex="1">
+          <mxGeometry height="90" width="280" x="770" y="595" as="geometry" />
+        </mxCell>
+        <mxCell id="upload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=14;fontStyle=1;" value="上传本地结果&lt;br&gt;weights + num_samples + aux payload" vertex="1">
+          <mxGeometry height="80" width="230" x="1130" y="600" as="geometry" />
+        </mxCell>
+        <mxCell id="agg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="服务端聚合&lt;br&gt;FedAvg 参数聚合&lt;br&gt;原型库与投影层状态聚合" vertex="1">
+          <mxGeometry height="90" width="280" x="790" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="update" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="更新 latest_global_model&lt;br&gt;调整学习率&lt;br&gt;进入下一轮" vertex="1">
+          <mxGeometry height="80" width="260" x="440" y="765" as="geometry" />
+        </mxCell>
+        <mxCell id="write" parent="1" style="ellipse;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=14;fontStyle=1;" value="训练结束&lt;br&gt;写入 metrics.json 和曲线图" vertex="1">
+          <mxGeometry height="80" width="230" x="145" y="760" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="start" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#555555;" target="partition">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="partition" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#555555;" target="init">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="init" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#555555;" target="eval0">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="eval0" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;fontSize=12;" target="select" value="未早停">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="select" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="local">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="local" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="upload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="upload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;" target="agg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="agg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;" target="update">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="update" style="endArrow=block;html=1;dashed=1;strokeWidth=2;strokeColor=#1976D2;fontSize=12;" target="eval0" value="下一通信轮">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="570" y="720" />
+              <mxPoint x="750" y="720" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="eval0" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;fontSize=12;" target="write" value="达到轮数或早停">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="300" y="520" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

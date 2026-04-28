@@ -1,0 +1,129 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="method-detail" name="方法细节图">
+    <mxGraphModel dx="1483" dy="842" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;" value="FedFed 类原型蒸馏插件方法细节图" vertex="1">
+          <mxGeometry height="50" width="720" x="390" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="client" parent="1" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#F5FBFF;strokeColor=#0277BD;fontSize=16;fontStyle=1;" value="客户端 FedFedClientPlugin" vertex="1">
+          <mxGeometry height="680" width="620" x="60" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="x" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="本地 batch&lt;br&gt;(X, y)" vertex="1">
+          <mxGeometry height="65" width="140" x="35" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="model" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="主模型前向&lt;br&gt;pred, h = model(X)" vertex="1">
+          <mxGeometry height="65" width="170" x="230" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="cls" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="分类损失&lt;br&gt;L_cls = CE(pred, y)" vertex="1">
+          <mxGeometry height="65" width="140" x="445" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="proj" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="低维投影&lt;br&gt;z_s = P(h)" vertex="1">
+          <mxGeometry height="65" width="170" x="230" y="175" as="geometry" />
+        </mxCell>
+        <mxCell id="local_proto" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="按类别求本地原型&lt;br&gt;p_k,c = mean(z_s | y=c)" vertex="1">
+          <mxGeometry height="75" width="210" x="55" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="distill" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" value="原型蒸馏损失&lt;br&gt;L_distill = d(p_k,c, p_g,c)&lt;br&gt;cosine / MSE" vertex="1">
+          <mxGeometry height="75" width="210" x="330" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="anchor" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#AD1457;fontSize=14;fontStyle=1;" value="特征锚定损失&lt;br&gt;L_anchor = 1 - cos(h, h_ref)" vertex="1">
+          <mxGeometry height="75" width="210" x="55" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="loss" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontSize=14;fontStyle=1;" value="联合优化&lt;br&gt;L = L_cls + lambda_distill L_distill + lambda_anchor L_anchor" vertex="1">
+          <mxGeometry height="75" width="230" x="330" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="privacy" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=14;fontStyle=1;" value="原型上传前处理&lt;br&gt;normalize + clip + noise" vertex="1">
+          <mxGeometry height="75" width="210" x="55" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="payload" parent="client" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="上传 payload&lt;br&gt;weights + projection_state&lt;br&gt;+ prototypes + counts" vertex="1">
+          <mxGeometry height="75" width="230" x="330" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="client" source="x" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="client" source="model" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="cls">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="client" source="model" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="proj">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="client" source="proj" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="local_proto">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="client" source="local_proto" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" target="distill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="client" source="cls" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="client" source="distill" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="client" source="anchor" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="client" source="local_proto" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#558B2F;" target="privacy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="client" source="privacy" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#558B2F;" target="payload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="server" parent="1" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=16;fontStyle=1;" value="服务端 FedFedServerPlugin" vertex="1">
+          <mxGeometry height="680" width="590" x="820" y="110" as="geometry" />
+        </mxCell>
+        <mxCell id="recv" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="接收客户端 payloads" vertex="1">
+          <mxGeometry height="65" width="180" x="45" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="modelagg" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="FedAvg 参数聚合&lt;br&gt;weights 按样本数加权" vertex="1">
+          <mxGeometry height="65" width="200" x="330" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pagg" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="投影层状态聚合&lt;br&gt;projection_state 加权平均" vertex="1">
+          <mxGeometry height="75" width="210" x="45" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="protoagg" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="类别原型聚合&lt;br&gt;p_g,c = weighted_mean(p_k,c)" vertex="1">
+          <mxGeometry height="75" width="220" x="320" y="230" as="geometry" />
+        </mxCell>
+        <mxCell id="bank" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="全局原型库更新&lt;br&gt;momentum 平滑&lt;br&gt;global_prototypes" vertex="1">
+          <mxGeometry height="85" width="220" x="185" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="broadcast" parent="server" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#455A64;fontSize=14;fontStyle=1;" value="下一轮广播&lt;br&gt;global model + projection_state&lt;br&gt;+ global prototypes" vertex="1">
+          <mxGeometry height="85" width="220" x="185" y="555" as="geometry" />
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="server" source="recv" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="modelagg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="server" source="recv" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="pagg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="server" source="recv" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="protoagg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="server" source="protoagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;" target="bank">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="server" source="modelagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="server" source="pagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="server" source="bank" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="payload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#558B2F;" target="recv">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="broadcast" style="endArrow=block;html=1;dashed=1;strokeWidth=2;strokeColor=#1976D2;fontSize=12;" target="distill" value="全局原型用于下一轮蒸馏">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1110" y="850" />
+              <mxPoint x="450" y="850" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

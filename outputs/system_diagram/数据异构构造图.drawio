@@ -1,0 +1,35 @@
+<mxfile host="app.diagrams.net" modified="2026-04-28T13:55:00.000Z" agent="Codex" version="24.7.17" type="device">
+  <diagram id="heterogeneity" name="数据异构构造图">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1500" pageHeight="950" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="Non-IID 数据异构构造图" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;" vertex="1" parent="1"><mxGeometry x="430" y="25" width="640" height="50" as="geometry"/></mxCell>
+        <mxCell id="raw" value="原始训练集&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;train_data, train_label&lt;br&gt;来自 GetDataSet&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="610" y="105" width="260" height="85" as="geometry"/></mxCell>
+        <mxCell id="resolve" value="统一异构强度解析&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;resolve_heterogeneity_options()&lt;br&gt;dirichlet_alpha 同时控制多类异构&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="590" y="235" width="300" height="90" as="geometry"/></mxCell>
+
+        <mxCell id="label" value="标签异构 Label Skew&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;Dirichlet(alpha) 按类别分配&lt;br&gt;alpha 越小，类别分布越不均衡&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="120" y="400" width="300" height="100" as="geometry"/></mxCell>
+        <mxCell id="quantity" value="数量异构 Quantity Skew&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;client_activity / quantity_skew_beta&lt;br&gt;不同客户端样本量不同&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="590" y="400" width="300" height="100" as="geometry"/></mxCell>
+        <mxCell id="feature" value="特征异构 Feature Skew&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;scale / bias / noise&lt;br&gt;客户端私有输入分布偏移&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="1060" y="400" width="300" height="100" as="geometry"/></mxCell>
+
+        <mxCell id="min" value="最小样本约束与重试机制&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;min_samples_per_client&lt;br&gt;最多重试 100 次，避免极端划分失稳&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#AD1457;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="250" y="590" width="310" height="90" as="geometry"/></mxCell>
+        <mxCell id="apply" value="客户端数据生成&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;get_each_client_data_index()&lt;br&gt;apply_feature_skew()&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="620" y="590" width="260" height="90" as="geometry"/></mxCell>
+        <mxCell id="clients" value="K 个异构客户端数据集&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;D_1, D_2, ..., D_K&lt;br&gt;标签分布、样本数量、特征分布均可能不同&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="940" y="590" width="330" height="90" as="geometry"/></mxCell>
+        <mxCell id="train" value="输入联邦训练主干&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;FedAvg / fedfed_prototype 对比实验&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=15;fontStyle=1;" vertex="1" parent="1"><mxGeometry x="590" y="760" width="310" height="80" as="geometry"/></mxCell>
+
+        <mxCell id="note" value="论文表述建议：alpha 不只是标签偏斜参数，在当前实现中也可作为整体异构强度控制旋钮。" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#FFFFFF;strokeColor=#455A64;fontSize=13;" vertex="1" parent="1"><mxGeometry x="1010" y="760" width="340" height="70" as="geometry"/></mxCell>
+
+        <mxCell id="e1" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#555555;" edge="1" parent="1" source="raw" target="resolve"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;" edge="1" parent="1" source="resolve" target="label"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e3" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00695C;" edge="1" parent="1" source="resolve" target="quantity"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e4" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="resolve" target="feature"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#AD1457;" edge="1" parent="1" source="label" target="min"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e6" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#AD1457;" edge="1" parent="1" source="quantity" target="min"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e7" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" edge="1" parent="1" source="min" target="apply"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e8" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" edge="1" parent="1" source="feature" target="apply"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e9" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="apply" target="clients"><mxGeometry relative="1" as="geometry"/></mxCell>
+        <mxCell id="e10" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;" edge="1" parent="1" source="clients" target="train"><mxGeometry relative="1" as="geometry"/></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

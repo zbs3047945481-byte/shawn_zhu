@@ -146,10 +146,32 @@ def input_options():
                         help='Whether to upload, aggregate, and broadcast class prototypes across clients.')
     parser.add_argument('--fedfed_enable_distill', type=str2bool, default=True,
                         help='Whether to apply prototype distillation loss during local training.')
+    parser.add_argument('--fedfed_enable_anchor', type=str2bool, default=True,
+                        help='Whether to anchor local features to the round-start model features.')
+    parser.add_argument('--fedfed_lambda_anchor', type=float, default=0.1,
+                        help='Weight of the local feature anchor loss.')
     parser.add_argument('--fedfed_enable_clip', type=str2bool, default=False,
                         help='Whether to clip prototype norm before upload.')
     parser.add_argument('--fedfed_enable_noise', type=str2bool, default=False,
                         help='Whether to add Gaussian noise to uploaded prototypes.')
+    parser.add_argument('--fedfed_adaptive_control', type=str2bool, default=False,
+                        help='Adapt distillation and anchor strengths from prototype quality and client drift signals.')
+    parser.add_argument('--fedfed_lambda_distill_max', type=float, default=1.0,
+                        help='Maximum distillation weight used by adaptive control.')
+    parser.add_argument('--fedfed_lambda_anchor_max', type=float, default=0.1,
+                        help='Maximum anchor weight used by adaptive control.')
+    parser.add_argument('--fedfed_proto_stability_threshold', type=float, default=0.90,
+                        help='Prototype cosine-stability threshold that marks server prototypes as reliable.')
+    parser.add_argument('--fedfed_proto_coverage_threshold', type=float, default=0.80,
+                        help='Reliable class coverage threshold that marks server prototypes as sufficiently complete.')
+    parser.add_argument('--fedfed_adaptive_ramp_rounds', type=int, default=3,
+                        help='Rounds used to ramp adaptive distillation after prototype quality becomes reliable.')
+    parser.add_argument('--fedfed_anchor_drift_threshold', type=float, default=0.08,
+                        help='Feature drift threshold above which adaptive anchor becomes active.')
+    parser.add_argument('--fedfed_anchor_drift_slope', type=float, default=50.0,
+                        help='Slope of the sigmoid gate used by adaptive anchor control.')
+    parser.add_argument('--fedfed_num_classes', type=int, default=10,
+                        help='Number of classes used to estimate prototype coverage.')
     
     args = parser.parse_args()
     #从命令行读取参数

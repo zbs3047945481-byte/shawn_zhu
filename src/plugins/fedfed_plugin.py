@@ -23,9 +23,11 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.prototype_sums = {}
         self.prototype_counts = {}
         self.current_round = 0
+        self.adaptive_control = {}
 
         feature_dim = options.get('fedfed_feature_dim', 512)
         sensitive_dim = options.get('fedfed_sensitive_dim', 64)
+        self.enable_adaptive_control = options.get('fedfed_adaptive_control', False)
         self.enable_projection = options.get('fedfed_enable_projection', True)
         self.enable_prototype_sharing = options.get('fedfed_enable_prototype_sharing', True)
         self.enable_distill = options.get('fedfed_enable_distill', True)
@@ -53,6 +55,9 @@ class FedFedClientPlugin(BaseClientPlugin):
         if server_payload is not None:
             self.global_projection_state = server_payload.get('projection_state')
             self.current_round = int(server_payload.get('round_index', self.current_round))
+            self.adaptive_control = server_payload.get('adaptive_control', {}) or {}
+        else:
+            self.adaptive_control = {}
         if self.enable_prototype_sharing:
             self.global_prototypes = None if server_payload is None else server_payload.get('global_prototypes')
             self.global_prototype_counts = {} if server_payload is None else server_payload.get('global_prototype_counts', {})
@@ -100,11 +105,25 @@ class FedFedClientPlugin(BaseClientPlugin):
         return float(count) / (float(count) + tau)
 
     def _distill_strength(self):
+        if self.enable_adaptive_control:
+            max_lambda = float(self.options.get('fedfed_lambda_distill_max', self.options.get('fedfed_lambda_distill', 1.0)))
+            scale = float(self.adaptive_control.get('distill_scale', 0.0))
+            return max_lambda * min(max(scale, 0.0), 1.0)
         warmup_rounds = int(self.options.get('fedfed_distill_warmup_rounds', 0))
         if warmup_rounds <= 0:
             return float(self.options.get('fedfed_lambda_distill', 1.0))
         progress = min(max(self.current_round, 0) / float(warmup_rounds), 1.0)
         return float(self.options.get('fedfed_lambda_distill', 1.0)) * progress
+
+    def _anchor_strength(self, loss_anchor):
+        if not self.enable_adaptive_control:
+            return float(self.options.get('fedfed_lambda_anchor', 0.1))
+        max_lambda = float(self.options.get('fedfed_lambda_anchor_max', self.options.get('fedfed_lambda_anchor', 0.1)))
+        threshold = float(self.options.get('fedfed_anchor_drift_threshold', 0.08))
+        slope = float(self.options.get('fedfed_anchor_drift_slope', 50.0))
+        drift = float(loss_anchor.detach().item())
+        gate = torch.sigmoid(loss_anchor.new_tensor(slope * (drift - threshold))).item()
+        return max_lambda * gate
 
     def _compute_anchor_loss(self, h, X):
         if not self.enable_anchor or self.reference_model is None:
@@ -154,7 +173,7 @@ class FedFedClientPlugin(BaseClientPlugin):
 
         loss_anchor = self._compute_anchor_loss(h, X)
         if loss_anchor is not None:
-            lambda_anchor = float(self.options.get('fedfed_lambda_anchor', 0.1))
+            lambda_anchor = self._anchor_strength(loss_anchor)
             loss = loss + lambda_anchor * loss_anchor
 
         loss_distill = self._compute_prototype_distill_loss(z_s, y)
@@ -215,6 +234,12 @@ class FedFedServerPlugin(BaseServerPlugin):
         self.global_prototype_counts = {}
         self.global_projection_state = None
         self.current_round = 0
+        self.adaptive_control_state = {
+            'distill_scale': 0.0,
+            'prototype_stability': 0.0,
+            'prototype_coverage': 0.0,
+            'ready_rounds': 0,
+        }
 
     def set_round_index(self, round_index):
         self.current_round = int(round_index)
@@ -232,7 +257,47 @@ class FedFedServerPlugin(BaseServerPlugin):
         if self.enable_prototype_sharing and self.global_prototypes is not None:
             payload['global_prototypes'] = self.global_prototypes
             payload['global_prototype_counts'] = self.global_prototype_counts
+        if self.options.get('fedfed_adaptive_control', False):
+            payload['adaptive_control'] = dict(self.adaptive_control_state)
         return payload or None
+
+    def _prototype_stability(self, old_prototypes, new_prototypes):
+        if not old_prototypes or not new_prototypes:
+            return 0.0
+        similarities = []
+        for class_id, prototype in new_prototypes.items():
+            if class_id not in old_prototypes:
+                continue
+            old_proto = old_prototypes[class_id].to(prototype.device).unsqueeze(0)
+            new_proto = prototype.unsqueeze(0)
+            old_proto = F.normalize(old_proto, dim=-1)
+            new_proto = F.normalize(new_proto, dim=-1)
+            similarities.append(F.cosine_similarity(old_proto, new_proto, dim=-1).item())
+        if not similarities:
+            return 0.0
+        return float(sum(similarities) / len(similarities))
+
+    def _update_adaptive_control(self, old_prototypes, new_prototypes):
+        if not self.options.get('fedfed_adaptive_control', False):
+            return
+        num_classes = max(int(self.options.get('fedfed_num_classes', 10)), 1)
+        coverage = min(len(new_prototypes) / float(num_classes), 1.0) if new_prototypes else 0.0
+        stability = self._prototype_stability(old_prototypes, new_prototypes)
+        stability_threshold = float(self.options.get('fedfed_proto_stability_threshold', 0.90))
+        coverage_threshold = float(self.options.get('fedfed_proto_coverage_threshold', 0.80))
+        ramp_rounds = max(int(self.options.get('fedfed_adaptive_ramp_rounds', 3)), 1)
+        is_ready = stability >= stability_threshold and coverage >= coverage_threshold
+        ready_rounds = int(self.adaptive_control_state.get('ready_rounds', 0))
+        ready_rounds = ready_rounds + 1 if is_ready else 0
+        stability_gate = min(max((stability - stability_threshold) / max(1.0 - stability_threshold, 1e-6), 0.0), 1.0)
+        coverage_gate = min(max((coverage - coverage_threshold) / max(1.0 - coverage_threshold, 1e-6), 0.0), 1.0)
+        ramp_gate = min(ready_rounds / float(ramp_rounds), 1.0)
+        self.adaptive_control_state = {
+            'distill_scale': stability_gate * coverage_gate * ramp_gate,
+            'prototype_stability': stability,
+            'prototype_coverage': coverage,
+            'ready_rounds': ready_rounds,
+        }
 
     def aggregate_client_payloads(self, local_model_paras_set):
         projection_sums = {}
@@ -282,6 +347,7 @@ class FedFedServerPlugin(BaseServerPlugin):
         if not prototype_sums:
             return
 
+        old_prototypes = dict(self.global_prototypes or {})
         updated_prototypes = dict(self.global_prototypes or {})
         updated_counts = dict(self.global_prototype_counts or {})
         for class_id, weighted_sum in prototype_sums.items():
@@ -296,3 +362,4 @@ class FedFedServerPlugin(BaseServerPlugin):
             updated_counts[class_id] = prototype_counts[class_id]
         self.global_prototypes = updated_prototypes
         self.global_prototype_counts = updated_counts
+        self._update_adaptive_control(old_prototypes, updated_prototypes)

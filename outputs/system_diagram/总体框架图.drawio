@@ -1,0 +1,135 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="overall-framework" name="总体框架图">
+    <mxGraphModel dx="1607" dy="912" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;verticalAlign=middle;" value="即插即用特征蒸馏联邦学习总体框架" vertex="1">
+          <mxGeometry height="50" width="740" x="430" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=16;fontStyle=1;" value="数据与异构性构造&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;MNIST / CIFAR-10&lt;br&gt;Dirichlet 标签偏斜&lt;br&gt;数量偏斜 + 特征偏斜&lt;/font&gt;" vertex="1">
+          <mxGeometry height="120" width="240" x="70" y="150" as="geometry" />
+        </mxCell>
+        <mxCell id="clients_box" parent="1" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#F5FBFF;strokeColor=#0277BD;fontSize=16;fontStyle=1;" value="客户端侧 Client Side" vertex="1">
+          <mxGeometry height="560" width="470" x="380" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="client_data" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="本地私有数据 D_k&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;每个客户端仅访问自身数据&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="190" x="35" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="local_model" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="本地主模型&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;CNN / ResNet&lt;br&gt;输出 logits 与中间特征 h&lt;/font&gt;" vertex="1">
+          <mxGeometry height="70" width="185" x="250" y="65" as="geometry" />
+        </mxCell>
+        <mxCell id="projection" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="低维投影模块&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;FeatureSplitModule&lt;br&gt;h -&gt; z_s&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="190" x="35" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="proto_extract" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="类别原型提取&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;按类别统计 z_s 均值&lt;br&gt;prototype_c + count_c&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="185" x="250" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="privacy" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#AD1457;fontSize=14;fontStyle=1;" value="上传前处理&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;归一化 / 裁剪 / 加噪&lt;br&gt;降低异常幅值与隐私风险&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="190" x="35" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="distill" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" value="原型蒸馏训练&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;本地原型对齐全局原型&lt;br&gt;cosine / MSE distill loss&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="185" x="250" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="loss" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="联合优化目标&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;L = L_cls + lambda_distill L_distill + lambda_anchor L_anchor&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="320" x="80" y="425" as="geometry" />
+        </mxCell>
+        <mxCell id="upload" parent="clients_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=14;fontStyle=1;" value="客户端上传&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;模型参数 weights&lt;br&gt;projection_state&lt;br&gt;class prototypes&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="200" x="135" y="520" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c1" edge="1" parent="clients_box" source="client_data" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="local_model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c2" edge="1" parent="clients_box" source="local_model" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="projection">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c3" edge="1" parent="clients_box" source="projection" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="proto_extract">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c4" edge="1" parent="clients_box" source="proto_extract" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="privacy">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c5" edge="1" parent="clients_box" source="proto_extract" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="distill">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c6" edge="1" parent="clients_box" source="distill" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c7" edge="1" parent="clients_box" source="privacy" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="upload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_c8" edge="1" parent="clients_box" source="loss" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#0277BD;" target="upload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="server_box" parent="1" style="swimlane;html=1;rounded=1;startSize=34;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=16;fontStyle=1;" value="服务端侧 Server Side" vertex="1">
+          <mxGeometry height="560" width="480" x="930" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="fedavg" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="FedAvg 参数聚合&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;按客户端样本数加权平均&lt;br&gt;更新全局模型参数&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="190" x="45" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="server_plugin" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" value="服务端 FedFed 插件&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;aggregate_client_payloads()&lt;br&gt;处理客户端附加信息&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="185" x="260" y="75" as="geometry" />
+        </mxCell>
+        <mxCell id="proj_agg" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="投影层状态聚合&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;projection_state&lt;br&gt;样本数加权平均&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="190" x="45" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="proto_agg" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="类别原型聚合&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;同类原型按 count 加权&lt;br&gt;形成全局类别原型&lt;/font&gt;" vertex="1">
+          <mxGeometry height="75" width="185" x="260" y="210" as="geometry" />
+        </mxCell>
+        <mxCell id="proto_bank" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="全局原型库&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;global_prototypes&lt;br&gt;momentum 平滑更新&lt;/font&gt;" vertex="1">
+          <mxGeometry height="80" width="200" x="145" y="345" as="geometry" />
+        </mxCell>
+        <mxCell id="broadcast" parent="server_box" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="服务端广播&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;global model&lt;br&gt;projection_state&lt;br&gt;global prototypes&lt;/font&gt;" vertex="1">
+          <mxGeometry height="85" width="200" x="145" y="480" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s1" edge="1" parent="server_box" source="server_plugin" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="proj_agg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s2" edge="1" parent="server_box" source="server_plugin" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="proto_agg">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s3" edge="1" parent="server_box" source="proto_agg" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="proto_bank">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s4" edge="1" parent="server_box" source="fedavg" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s5" edge="1" parent="server_box" source="proj_agg" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_s6" edge="1" parent="server_box" source="proto_bank" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#F9A825;" target="broadcast">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="metrics" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=15;fontStyle=1;" value="评估与结果输出&lt;br&gt;&lt;font style=&quot;font-size: 12px;&quot;&gt;全局测试 accuracy / loss&lt;br&gt;metrics.json&lt;br&gt;训练曲线与实验汇总&lt;/font&gt;" vertex="1">
+          <mxGeometry height="100" width="330" x="610" y="780" as="geometry" />
+        </mxCell>
+        <mxCell id="baseline_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;dashed=1;fillColor=#FFFFFF;strokeColor=#455A64;fontSize=14;fontStyle=1;" value="插件关闭时：系统退化为标准 FedAvg 基线" vertex="1">
+          <mxGeometry height="60" width="280" x="1100" y="790" as="geometry" />
+        </mxCell>
+        <mxCell id="e_data_client" edge="1" parent="1" source="data" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#2E7D32;" target="client_data">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_upload_server" edge="1" parent="1" source="upload" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#558B2F;fontSize=12;" target="fedavg" value="上传本地更新">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_upload_plugin" edge="1" parent="1" source="upload" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#7B1FA2;fontSize=12;" target="server_plugin" value="上传附加原型信息">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_broadcast_client" edge="1" parent="1" source="broadcast" style="endArrow=block;html=1;rounded=0;dashed=1;strokeWidth=2;strokeColor=#1976D2;fontSize=12;" target="local_model" value="下一轮广播">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1170" y="730" />
+              <mxPoint x="620" y="730" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_eval" edge="1" parent="1" source="broadcast" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" target="metrics">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_baseline" edge="1" parent="1" source="server_plugin" style="endArrow=block;html=1;rounded=0;dashed=1;strokeWidth=2;strokeColor=#455A64;" target="baseline_note">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
