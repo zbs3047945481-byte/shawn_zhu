@@ -1,0 +1,103 @@
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Times New Roman",
+    "fontSize": "20px",
+    "primaryColor": "#E8F1FB",
+    "primaryTextColor": "#1F2937",
+    "primaryBorderColor": "#3B82F6",
+    "lineColor": "#4B5563",
+    "secondaryColor": "#EEF2FF",
+    "tertiaryColor": "#F8FAFC",
+    "clusterBkg": "#F9FBFF",
+    "clusterBorder": "#94A3B8"
+  },
+  "flowchart": {
+    "curve": "linear",
+    "nodeSpacing": 28,
+    "rankSpacing": 42,
+    "htmlLabels": true
+  }
+}}%%
+
+flowchart TB
+
+    A["<b>Experiment Entry</b><br/>main.py / options.py<br/>Configuration parsing"] --> B
+    A --> C
+
+    subgraph B["Heterogeneous Data Construction"]
+        direction TB
+        B1["<b>Dataset Loading</b><br/>MNIST train/test set"]
+        B2["<b>Label and Quantity Skew</b><br/>Dirichlet partition"]
+        B3["<b>Feature Skew</b><br/>scale / bias / noise perturbation"]
+        B4["<b>Retry Constraint</b><br/>minimum samples per client"]
+        B1 --> B2 --> B3 --> B4
+    end
+
+    subgraph C["Federated Learning Backbone"]
+        direction TB
+        C1["<b>FedAvg Trainer</b><br/>client sampling"]
+        C2["<b>Global Model Broadcast</b><br/>server to clients"]
+        C3["<b>Local Training Scheduling</b><br/>per-round orchestration"]
+        C4["<b>Parameter Aggregation</b><br/>weighted model averaging"]
+        C5["<b>Global Evaluation</b><br/>metrics and curves"]
+        C1 --> C2 --> C3 --> C4 --> C5
+    end
+
+    B4 --> C1
+    C2 --> D1
+    C3 --> D1
+
+    subgraph D["Client Side"]
+        direction LR
+        D1["<b>Local Model</b><br/>CNN backbone<br/>logits + feature h"]
+        D2["<b>Plugin Insertion Point</b><br/>on_round_start"]
+        D3["<b>Plugin Insertion Point</b><br/>train_batch"]
+        D4["<b>Plugin Insertion Point</b><br/>build_upload_payload"]
+        D1 --> D2 --> D3 --> D4
+    end
+
+    subgraph E["Feature Distillation Plugin"]
+        direction TB
+        E1["<b>Low-Dimensional Projection</b><br/>FeatureSplitModule<br/>h to z_s"]
+        E2["<b>Class Prototype Extraction</b><br/>local class-wise mean features"]
+        E3["<b>Privacy and Stability Control</b><br/>normalization + clipping + Gaussian noise"]
+        E4["<b>Prototype Distillation</b><br/>align local prototypes with global prototypes"]
+        E5["<b>Joint Optimization</b><br/>classification loss + distillation loss"]
+        E1 --> E2 --> E3 --> E4 --> E5
+    end
+
+    D3 --> E1
+    E5 --> D4
+
+    subgraph F["Server Side Plugin"]
+        direction TB
+        F1["<b>Auxiliary Payload Aggregation</b><br/>collect projection states and prototypes"]
+        F2["<b>Projection State Fusion</b><br/>weighted averaging"]
+        F3["<b>Global Prototype Aggregation</b><br/>class-wise weighted averaging"]
+        F4["<b>Prototype Broadcast</b><br/>global reference for next round"]
+        F1 --> F2 --> F3 --> F4
+    end
+
+    D4 --> G["<b>Client Upload</b><br/>model weights + projection state + class prototypes"]
+    G --> C4
+    G --> F1
+    F4 --> D2
+    C4 --> H["<b>Updated Global Model</b>"]
+    H --> C2
+
+    classDef entry fill:#DBEAFE,stroke:#2563EB,stroke-width:2px,color:#111827;
+    classDef hetero fill:#ECFDF5,stroke:#10B981,stroke-width:2px,color:#111827;
+    classDef backbone fill:#EFF6FF,stroke:#3B82F6,stroke-width:2px,color:#111827;
+    classDef client fill:#FFF7ED,stroke:#F97316,stroke-width:2px,color:#111827;
+    classDef plugin fill:#F5F3FF,stroke:#7C3AED,stroke-width:2px,color:#111827;
+    classDef server fill:#FEF2F2,stroke:#EF4444,stroke-width:2px,color:#111827;
+    classDef io fill:#F8FAFC,stroke:#64748B,stroke-width:2px,color:#111827;
+
+    class A entry;
+    class B,B1,B2,B3,B4 hetero;
+    class C,C1,C2,C3,C4,C5,H backbone;
+    class D,D1,D2,D3,D4 client;
+    class E,E1,E2,E3,E4,E5 plugin;
+    class F,F1,F2,F3,F4 server;
+    class G io;

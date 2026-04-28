@@ -1,7 +1,4 @@
-import torch
 from torchvision import datasets
-from torch.utils.data import DataLoader
-from torchvision.transforms import ToTensor
 import numpy as np
 import os
 import gzip
@@ -19,9 +16,10 @@ class GetDataSet():
         self.test_label = None
         self.test_data_size = None
 
-        #只支持 MNIST（或字符串 mnist）
         if self.dataset_name.startswith('mnist'):
             self.mnistDataDistribution()
+        elif self.dataset_name in {'cifar10', 'cifar-10'}:
+            self.cifar10DataDistribution()
         else:
             raise ValueError('Unsupported dataset: {}'.format(dataset_name))
 
@@ -71,6 +69,22 @@ class GetDataSet():
         self.train_label = np.argmax(train_labels == 1, axis = 1)
         self.test_data = test_images
         self.test_label = np.argmax(test_labels == 1, axis = 1)
+        print(self.train_data.shape)
+
+    def cifar10DataDistribution(self):
+        data_dir = './data'
+        train_dataset = datasets.CIFAR10(root=data_dir, train=True, download=True)
+        test_dataset = datasets.CIFAR10(root=data_dir, train=False, download=True)
+
+        train_images = train_dataset.data.astype(np.float32) / 255.0
+        test_images = test_dataset.data.astype(np.float32) / 255.0
+
+        self.train_data = np.transpose(train_images, (0, 3, 1, 2))
+        self.test_data = np.transpose(test_images, (0, 3, 1, 2))
+        self.train_label = np.asarray(train_dataset.targets, dtype=np.int64)
+        self.test_label = np.asarray(test_dataset.targets, dtype=np.int64)
+        self.train_data_size = self.train_data.shape[0]
+        self.test_data_size = self.test_data.shape[0]
         print(self.train_data.shape)
 
 

@@ -17,7 +17,7 @@ def save_single_run_plots(metrics, output_dir):
     if not plotting_available():
         return False
 
-    rounds = list(range(len(metrics['acc_on_g_test_data'])))
+    rounds = metrics.get('rounds') or list(range(len(metrics['acc_on_g_test_data'])))
     acc_values = metrics['acc_on_g_test_data']
     loss_values = metrics['loss_on_g_test_data']
 

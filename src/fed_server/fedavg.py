@@ -44,9 +44,16 @@ class FedAvgTrainer(BaseFederated):
         # self.latest_global_model = self.get_model_parameters()
         #self.num_round=通信轮数
         #每一轮=一次完整的：下发模型、本地训练、聚合
+        early_stop = self._init_early_stop_state()
+        stopped_early = False
         for round_i in range(self.num_round):
             #用当前全局模型、在测试集上评估、记录accuracy/loss
-            self.test_latest_model_on_testdata(round_i)#全局模型评估
+            eval_stats = self.test_latest_model_on_testdata(round_i)#全局模型评估
+            if self._should_stop_early(round_i, eval_stats, early_stop):
+                print('>>> Early stop at round {}: best_acc={:.3%}, current_acc={:.3%}'.format(
+                    round_i, early_stop['best_acc'], eval_stats['acc']))
+                stopped_early = True
+                break
             #客户端抽样
             selected_clients = self.select_clients()
 
@@ -62,7 +69,8 @@ class FedAvgTrainer(BaseFederated):
             self.optimizer.adjust_learning_rate(round_i)
 
         #最后一轮测试，把所有指标写入文件
-        self.test_latest_model_on_testdata(self.num_round)
+        if not stopped_early:
+            self.test_latest_model_on_testdata(self.num_round)
         self.metrics.write()
 
     #非常标准的FedAvg实现
@@ -85,3 +93,24 @@ class FedAvgTrainer(BaseFederated):
             raise ValueError('No clients are available for federation.')
         raw_num_clients = int(self.per_round_c_fraction * self.clients_num)
         return min(max(raw_num_clients, 1), self.clients_num)
+
+    def _init_early_stop_state(self):
+        return {
+            'enabled': bool(self.options.get('early_stop_enable', False)),
+            'min_rounds': max(int(self.options.get('early_stop_min_rounds', 0)), 0),
+            'patience': max(int(self.options.get('early_stop_patience', 0)), 0),
+            'min_delta': max(float(self.options.get('early_stop_min_delta', 0.0)), 0.0),
+            'best_acc': -np.inf,
+            'stale_rounds': 0,
+        }
+
+    def _should_stop_early(self, round_i, eval_stats, state):
+        if not state['enabled'] or state['patience'] <= 0:
+            return False
+        current_acc = eval_stats['acc']
+        if current_acc > state['best_acc'] + state['min_delta']:
+            state['best_acc'] = current_acc
+            state['stale_rounds'] = 0
+            return False
+        state['stale_rounds'] += 1
+        return round_i >= state['min_rounds'] and state['stale_rounds'] >= state['patience']

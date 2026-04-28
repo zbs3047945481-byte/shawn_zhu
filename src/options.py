@@ -58,6 +58,14 @@ def input_options():
                         help='Whether DataLoader should pin host memory when using GPU.')
     parser.add_argument('--torch_cudnn_benchmark', type=str2bool, default=True,
                         help='Enable cudnn benchmark for faster fixed-shape GPU training.')
+    parser.add_argument('--early_stop_enable', type=str2bool, default=False,
+                        help='Stop training when the global test accuracy has plateaued.')
+    parser.add_argument('--early_stop_min_rounds', type=int, default=0,
+                        help='Minimum communication rounds before early stopping is allowed.')
+    parser.add_argument('--early_stop_patience', type=int, default=0,
+                        help='Number of evaluated rounds without meaningful improvement before stopping.')
+    parser.add_argument('--early_stop_min_delta', type=float, default=0.0,
+                        help='Minimum absolute accuracy improvement required to reset early-stop patience.')
 
     parser.add_argument("--lr", type=float, default=0.001, help="learning rate, \
                         use value from origin paper as default")
@@ -150,6 +158,9 @@ def input_options():
     #把参数对象转成字典
     if options['is_iid']:
         options['partition_strategy'] = 'iid'
+    if str(options['dataset_name']).lower() in {'cifar10', 'cifar-10'} and options['model_name'] == 'mnist_cnn':
+        options['model_name'] = 'cifar_resnet18'
+        options['fedfed_feature_dim'] = 512
 
     return options
 

@@ -151,6 +151,7 @@ trap 'cleanup_temp_dir "${TMP_DIR}"' EXIT
 RUNNER_NAME="foreground_${RUN_ID}.ps1"
 RUNNER_PATH="${TMP_DIR}/${RUNNER_NAME}"
 REMOTE_RUNNER_PATH="${REMOTE_Codex_DIR}/${RUNNER_NAME}"
+REMOTE_RUNNER_PS_PATH="${REMOTE_RUNNER_PATH//\//\\}"
 
 cat > "${RUNNER_PATH}" <<EOF
 \$ErrorActionPreference = 'Stop'
@@ -192,7 +193,7 @@ EOF
 echo "Submitting foreground experiment ${RUN_ID} to $(ssh_target)..."
 ssh_remote "powershell -NoProfile -Command \"New-Item -ItemType Directory -Force -Path '${REMOTE_Codex_DIR}' | Out-Null\""
 scp_to_remote "${RUNNER_PATH}" "${REMOTE_RUNNER_PATH}"
-ssh_remote "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${REMOTE_RUNNER_PATH}\""
+ssh_remote "powershell.exe -NoProfile -ExecutionPolicy Bypass -File \"${REMOTE_RUNNER_PS_PATH}\""
 
 echo "Experiment finished: ${RUN_ID}"
 "${SCRIPT_DIR}/check_remote_run.sh" --run-id "${RUN_ID}" --tail-lines "${TAIL_LINES}"

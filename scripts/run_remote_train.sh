@@ -108,6 +108,7 @@ New-Item -ItemType File -Force -Path \$stderrPath | Out-Null
 
 try {
   Set-Location \$projectPath
+  \$ErrorActionPreference = 'Continue'
   & \$pythonPath '-u' 'main.py' @args 1>> \$stdoutPath 2>> \$stderrPath
   \$exitCode = if (\$LASTEXITCODE -ne \$null) { \$LASTEXITCODE } else { 0 }
 } catch {

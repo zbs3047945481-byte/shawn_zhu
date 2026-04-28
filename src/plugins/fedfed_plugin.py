@@ -1,3 +1,5 @@
+import copy
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -27,11 +29,13 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.enable_projection = options.get('fedfed_enable_projection', True)
         self.enable_prototype_sharing = options.get('fedfed_enable_prototype_sharing', True)
         self.enable_distill = options.get('fedfed_enable_distill', True)
+        self.enable_anchor = options.get('fedfed_enable_anchor', True)
         self.enable_clip = options.get('fedfed_enable_clip', True)
         self.enable_noise = options.get('fedfed_enable_noise', True)
         self.use_cosine_distill = options.get('fedfed_use_cosine_distill', True)
         self.normalize_prototypes = options.get('fedfed_normalize_prototypes', True)
         self.projection_module = None
+        self.reference_model = None
         if self.enable_projection:
             self.projection_module = FeatureSplitModule(feature_dim, sensitive_dim)
             self.projection_module.to(self.device)
@@ -62,6 +66,13 @@ class FedFedClientPlugin(BaseClientPlugin):
             self.projection_module.load_state_dict(projection_state, strict=True)
         if self.projection_module is not None:
             self.projection_module.train()
+        if self.enable_anchor:
+            self.reference_model = copy.deepcopy(self.model).to(self.device)
+            self.reference_model.eval()
+            for parameter in self.reference_model.parameters():
+                parameter.requires_grad_(False)
+        else:
+            self.reference_model = None
         self.prototype_sums = {}
         self.prototype_counts = {}
 
@@ -94,6 +105,15 @@ class FedFedClientPlugin(BaseClientPlugin):
             return float(self.options.get('fedfed_lambda_distill', 1.0))
         progress = min(max(self.current_round, 0) / float(warmup_rounds), 1.0)
         return float(self.options.get('fedfed_lambda_distill', 1.0)) * progress
+
+    def _compute_anchor_loss(self, h, X):
+        if not self.enable_anchor or self.reference_model is None:
+            return None
+        with torch.no_grad():
+            _, reference_h = self.reference_model(X, return_feature=True)
+        normalized_h = F.normalize(h, dim=-1)
+        normalized_reference_h = F.normalize(reference_h, dim=-1)
+        return 1.0 - F.cosine_similarity(normalized_h, normalized_reference_h, dim=-1).mean()
 
     def _compute_prototype_distill_loss(self, z_s, y):
         if not self.enable_distill or not self.global_prototypes:
@@ -132,10 +152,15 @@ class FedFedClientPlugin(BaseClientPlugin):
         loss_cls = F.cross_entropy(pred, y)
         loss = loss_cls
 
+        loss_anchor = self._compute_anchor_loss(h, X)
+        if loss_anchor is not None:
+            lambda_anchor = float(self.options.get('fedfed_lambda_anchor', 0.1))
+            loss = loss + lambda_anchor * loss_anchor
+
         loss_distill = self._compute_prototype_distill_loss(z_s, y)
         if loss_distill is not None:
             lambda_distill = self._distill_strength()
-            loss = loss_cls + lambda_distill * loss_distill
+            loss = loss + lambda_distill * loss_distill
 
         self._accumulate_batch_prototypes(self._normalize_prototype(z_s.detach()), y)
         loss.backward()

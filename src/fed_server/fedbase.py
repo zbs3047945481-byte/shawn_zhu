@@ -134,15 +134,21 @@ class BaseFederated(object):
         averaged_paras = copy.deepcopy(self.model.state_dict())
         train_data_num = 0
         for var in averaged_paras:
-            averaged_paras[var] = 0
+            if averaged_paras[var].is_floating_point():
+                averaged_paras[var] = torch.zeros_like(averaged_paras[var])
         for update in local_model_paras_set:
             num_sample = update["num_samples"]
             local_model_paras = update["weights"]
             for var in averaged_paras:
-                averaged_paras[var] += num_sample * local_model_paras[var]
+                if averaged_paras[var].is_floating_point():
+                    averaged_paras[var] += num_sample * local_model_paras[var]
             train_data_num += num_sample
         for var in averaged_paras:
-            averaged_paras[var] /= train_data_num
+            if averaged_paras[var].is_floating_point():
+                averaged_paras[var] /= train_data_num
+            else:
+                largest_update = max(local_model_paras_set, key=lambda update: update["num_samples"])
+                averaged_paras[var] = largest_update["weights"][var].clone()
         if self.server_plugin is not None:
             self.server_plugin.aggregate_client_payloads(local_model_paras_set)
         return averaged_paras
@@ -163,6 +169,7 @@ class BaseFederated(object):
             print('=' * 102 + "\n")
 
         self.metrics.update_test_stats(round_i, stats_from_test_data)
+        return stats_from_test_data
 
 #把当前最新的全局模型拿出来，在全局测试集上跑一遍，计算平均准确率、平均损失，并返回统计结果。
     def global_test(self, use_test_data=True):
