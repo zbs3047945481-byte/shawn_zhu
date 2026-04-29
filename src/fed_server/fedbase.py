@@ -90,7 +90,6 @@ class BaseFederated(object):
         #从全局训练集里取出属于这个客户端的数据，对这个客户端的数据施加它专属的特征偏移
             local_train_label = train_label[local_indices]#取出这个客户端对应的标签。
             local_model = self.model_builder()#创建一个本地模型，这个模型是基于全局模型构建的，但是每个客户端的模型参数都是独立的。
-            local_model.to(self.device)
             local_optimizer = self.optimizer_builder(local_model.parameters())#创建一个本地优化器，这个优化器是基于全局优化器构建的，但是每个客户端的优化器参数都是独立的。
     #优化器是“根据损失函数计算出来的梯度，去更新模型参数”的工具。
     #训练四步：1.模型前向计算，得到预测结果；2.根据预测和真实标签算出损失；3.反向传播得到每个参数怎么改；（优化器负责执行“改参数”这一步）
@@ -141,14 +140,14 @@ class BaseFederated(object):
             local_model_paras = update["weights"]
             for var in averaged_paras:
                 if averaged_paras[var].is_floating_point():
-                    averaged_paras[var] += num_sample * local_model_paras[var]
+                    averaged_paras[var] += num_sample * local_model_paras[var].to(averaged_paras[var].device)
             train_data_num += num_sample
         for var in averaged_paras:
             if averaged_paras[var].is_floating_point():
                 averaged_paras[var] /= train_data_num
             else:
                 largest_update = max(local_model_paras_set, key=lambda update: update["num_samples"])
-                averaged_paras[var] = largest_update["weights"][var].clone()
+                averaged_paras[var] = largest_update["weights"][var].clone().to(averaged_paras[var].device)
         if self.server_plugin is not None:
             self.server_plugin.aggregate_client_payloads(local_model_paras_set)
         return averaged_paras

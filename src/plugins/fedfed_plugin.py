@@ -30,13 +30,16 @@ class FedFedClientPlugin(BaseClientPlugin):
         self.enable_adaptive_control = options.get('fedfed_adaptive_control', False)
         self.enable_projection = options.get('fedfed_enable_projection', True)
         self.enable_prototype_sharing = options.get('fedfed_enable_prototype_sharing', True)
+        self.prototype_source = str(options.get('fedfed_prototype_source', 'train')).lower()
         self.enable_distill = options.get('fedfed_enable_distill', True)
         self.enable_anchor = options.get('fedfed_enable_anchor', True)
+        self.enable_proto_cls = options.get('fedfed_enable_proto_cls', False)
         self.enable_clip = options.get('fedfed_enable_clip', True)
         self.enable_noise = options.get('fedfed_enable_noise', True)
         self.use_cosine_distill = options.get('fedfed_use_cosine_distill', True)
         self.normalize_prototypes = options.get('fedfed_normalize_prototypes', True)
         self.projection_module = None
+        self.reference_projection_module = None
         self.reference_model = None
         if self.enable_projection:
             self.projection_module = FeatureSplitModule(feature_dim, sensitive_dim)
@@ -46,6 +49,37 @@ class FedFedClientPlugin(BaseClientPlugin):
         if self.projection_module is not None:
             trainable_params += list(self.projection_module.parameters())
         self.optimizer = torch.optim.Adam(trainable_params, lr=options.get('lr', 0.001))
+
+    def to_device(self, device):
+        self.device = device
+        self.gpu = device.type != 'cpu'
+        if self.projection_module is not None:
+            self.projection_module.to(device)
+        if self.reference_projection_module is not None:
+            self.reference_projection_module.to(device)
+        if self.reference_model is not None:
+            self.reference_model.to(device)
+        self._move_optimizer_state(device)
+        self.prototype_sums = {
+            class_id: feature_sum.to(device)
+            for class_id, feature_sum in self.prototype_sums.items()
+        }
+        if self.global_prototypes is not None:
+            self.global_prototypes = {
+                class_id: prototype.to(device)
+                for class_id, prototype in self.global_prototypes.items()
+            }
+        if self.global_projection_state is not None:
+            self.global_projection_state = {
+                key: value.to(device)
+                for key, value in self.global_projection_state.items()
+            }
+
+    def _move_optimizer_state(self, device):
+        for state in self.optimizer.state.values():
+            for key, value in state.items():
+                if torch.is_tensor(value):
+                    state[key] = value.to(device)
 
     def on_round_start(self, learning_rate, server_payload):
         for group in self.optimizer.param_groups:
@@ -71,13 +105,22 @@ class FedFedClientPlugin(BaseClientPlugin):
             self.projection_module.load_state_dict(projection_state, strict=True)
         if self.projection_module is not None:
             self.projection_module.train()
-        if self.enable_anchor:
+        needs_reference_model = self.enable_anchor or self.prototype_source == 'reference'
+        if needs_reference_model:
             self.reference_model = copy.deepcopy(self.model).to(self.device)
             self.reference_model.eval()
             for parameter in self.reference_model.parameters():
                 parameter.requires_grad_(False)
+            if self.projection_module is not None:
+                self.reference_projection_module = copy.deepcopy(self.projection_module).to(self.device)
+                self.reference_projection_module.eval()
+                for parameter in self.reference_projection_module.parameters():
+                    parameter.requires_grad_(False)
+            else:
+                self.reference_projection_module = None
         else:
             self.reference_model = None
+            self.reference_projection_module = None
         self.prototype_sums = {}
         self.prototype_counts = {}
 
@@ -116,14 +159,19 @@ class FedFedClientPlugin(BaseClientPlugin):
         return float(self.options.get('fedfed_lambda_distill', 1.0)) * progress
 
     def _anchor_strength(self, loss_anchor):
-        if not self.enable_adaptive_control:
-            return float(self.options.get('fedfed_lambda_anchor', 0.1))
-        max_lambda = float(self.options.get('fedfed_lambda_anchor_max', self.options.get('fedfed_lambda_anchor', 0.1)))
-        threshold = float(self.options.get('fedfed_anchor_drift_threshold', 0.08))
-        slope = float(self.options.get('fedfed_anchor_drift_slope', 50.0))
-        drift = float(loss_anchor.detach().item())
-        gate = torch.sigmoid(loss_anchor.new_tensor(slope * (drift - threshold))).item()
-        return max_lambda * gate
+        if self.enable_adaptive_control:
+            max_lambda = float(self.options.get('fedfed_lambda_anchor_max', self.options.get('fedfed_lambda_anchor', 0.1)))
+            threshold = float(self.options.get('fedfed_anchor_drift_threshold', 0.08))
+            slope = float(self.options.get('fedfed_anchor_drift_slope', 50.0))
+            drift = float(loss_anchor.detach().item())
+            gate = torch.sigmoid(loss_anchor.new_tensor(slope * (drift - threshold))).item()
+            return max_lambda * gate
+        if self.options.get('fedfed_anchor_epoch_scaling', False):
+            max_lambda = float(self.options.get('fedfed_lambda_anchor_max', self.options.get('fedfed_lambda_anchor', 0.1)))
+            ref_epoch = max(float(self.options.get('fedfed_anchor_ref_epoch', 5.0)), 1.0)
+            local_epoch = max(float(self.options.get('local_epoch', 1)), 0.0)
+            return max_lambda * min(local_epoch / ref_epoch, 1.0)
+        return float(self.options.get('fedfed_lambda_anchor', 0.1))
 
     def _compute_anchor_loss(self, h, X):
         if not self.enable_anchor or self.reference_model is None:
@@ -164,6 +212,24 @@ class FedFedClientPlugin(BaseClientPlugin):
         weight_tensor = torch.stack(prototype_weights).clamp(min=1e-6)
         return (loss_tensor * weight_tensor).sum() / weight_tensor.sum()
 
+    def _compute_proto_cls_loss(self, h, y):
+        if not self.enable_proto_cls or not hasattr(self.model, 'classify_feature'):
+            return None
+        prototypes = []
+        labels = []
+        for label in y.unique():
+            class_mask = (y == label)
+            if not class_mask.any():
+                continue
+            prototypes.append(h[class_mask].mean(dim=0))
+            labels.append(label)
+        if not prototypes:
+            return None
+        prototype_tensor = torch.stack(prototypes, dim=0)
+        label_tensor = torch.stack(labels).long().to(h.device)
+        logits = self.model.classify_feature(prototype_tensor)
+        return F.cross_entropy(logits, label_tensor)
+
     def train_batch(self, X, y):
         self.optimizer.zero_grad()
         pred, h = self.model(X, return_feature=True)
@@ -181,7 +247,13 @@ class FedFedClientPlugin(BaseClientPlugin):
             lambda_distill = self._distill_strength()
             loss = loss + lambda_distill * loss_distill
 
-        self._accumulate_batch_prototypes(self._normalize_prototype(z_s.detach()), y)
+        loss_proto_cls = self._compute_proto_cls_loss(h, y)
+        if loss_proto_cls is not None:
+            lambda_proto_cls = float(self.options.get('fedfed_lambda_proto_cls', 0.1))
+            loss = loss + lambda_proto_cls * loss_proto_cls
+
+        if self.prototype_source == 'train':
+            self._accumulate_batch_prototypes(self._normalize_prototype(z_s.detach()), y)
         loss.backward()
         self.optimizer.step()
         return pred, loss.detach()
@@ -198,6 +270,40 @@ class FedFedClientPlugin(BaseClientPlugin):
             else:
                 self.prototype_sums[class_id] += class_feature_sum
                 self.prototype_counts[class_id] += class_count
+
+    def collect_reference_prototypes(self, dataloader):
+        if (
+            not self.enable_prototype_sharing
+            or self.prototype_source != 'reference'
+            or self.reference_model is None
+        ):
+            return
+
+        self.prototype_sums = {}
+        self.prototype_counts = {}
+        was_training = self.model.training
+        self.reference_model.eval()
+        if self.reference_projection_module is not None:
+            self.reference_projection_module.eval()
+
+        max_batches = int(self.options.get('fedfed_reference_proto_max_batches', 0))
+        pin_memory = self.device.type != 'cpu' and self.options.get('dataloader_pin_memory', True)
+        with torch.no_grad():
+            for batch_index, (X, y) in enumerate(dataloader, start=1):
+                if max_batches > 0 and batch_index > max_batches:
+                    break
+                if self.device.type != 'cpu':
+                    X = X.to(self.device, non_blocking=pin_memory)
+                    y = y.to(self.device, non_blocking=pin_memory)
+                _, h = self.reference_model(X, return_feature=True)
+                if self.reference_projection_module is not None:
+                    z_s = self.reference_projection_module(h)
+                else:
+                    z_s = h
+                self._accumulate_batch_prototypes(self._normalize_prototype(z_s.detach()), y)
+
+        if was_training:
+            self.model.train()
 
     def build_upload_payload(self):
         payload = {}

@@ -144,12 +144,25 @@ def input_options():
                         help='Whether to use the low-dimensional projection module before prototype sharing.')
     parser.add_argument('--fedfed_enable_prototype_sharing', type=str2bool, default=True,
                         help='Whether to upload, aggregate, and broadcast class prototypes across clients.')
+    parser.add_argument('--fedfed_prototype_source', type=str, default='train',
+                        choices=['train', 'reference'],
+                        help='Source used for uploaded prototypes: training-time features or round-start reference model.')
+    parser.add_argument('--fedfed_reference_proto_max_batches', type=int, default=0,
+                        help='Max batches for reference-model prototype collection; <=0 means full local dataset.')
     parser.add_argument('--fedfed_enable_distill', type=str2bool, default=True,
                         help='Whether to apply prototype distillation loss during local training.')
     parser.add_argument('--fedfed_enable_anchor', type=str2bool, default=True,
                         help='Whether to anchor local features to the round-start model features.')
     parser.add_argument('--fedfed_lambda_anchor', type=float, default=0.1,
                         help='Weight of the local feature anchor loss.')
+    parser.add_argument('--fedfed_anchor_epoch_scaling', type=str2bool, default=False,
+                        help='Scale anchor weight by local training intensity.')
+    parser.add_argument('--fedfed_anchor_ref_epoch', type=float, default=5.0,
+                        help='Local epoch value at which epoch-scaled anchor reaches fedfed_lambda_anchor_max.')
+    parser.add_argument('--fedfed_enable_proto_cls', type=str2bool, default=False,
+                        help='Apply cross-entropy classification loss on local backbone class prototypes.')
+    parser.add_argument('--fedfed_lambda_proto_cls', type=float, default=0.1,
+                        help='Weight of prototype classification loss.')
     parser.add_argument('--fedfed_enable_clip', type=str2bool, default=False,
                         help='Whether to clip prototype norm before upload.')
     parser.add_argument('--fedfed_enable_noise', type=str2bool, default=False,
