@@ -26,3 +26,6 @@ class CifarResNet18(nn.Module):
         if return_feature:
             return logits, feature
         return logits
+
+    def classify_feature(self, feature):
+        return self.backbone.fc(feature)

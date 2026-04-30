@@ -31,3 +31,6 @@ class Mnist_CNN(nn.Module):
         if return_feature:
             return logits, h
         return logits
+
+    def classify_feature(self, feature):
+        return self.fc2(feature)
