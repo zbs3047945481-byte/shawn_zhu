@@ -132,6 +132,9 @@ def input_options():
                         help='Weight of feature distillation loss L_distill.')
     parser.add_argument('--fedfed_distill_warmup_rounds', type=int, default=3,
                         help='Warm up prototype distillation over the first few communication rounds.')
+    parser.add_argument('--fedfed_distill_warmup_mode', type=str, default='linear',
+                        choices=['linear', 'hard'],
+                        help='linear ramps distillation weight; hard disables it until warmup rounds finish.')
     parser.add_argument('--fedfed_distill_count_tau', type=float, default=8.0,
                         help='Reliability temperature for local/global class counts in prototype distillation.')
     parser.add_argument('--fedfed_prototype_momentum', type=float, default=0.8,
@@ -149,8 +152,20 @@ def input_options():
                         help='Source used for uploaded prototypes: training-time features or round-start reference model.')
     parser.add_argument('--fedfed_reference_proto_max_batches', type=int, default=0,
                         help='Max batches for reference-model prototype collection; <=0 means full local dataset.')
+    parser.add_argument('--fedfed_num_prototypes_per_class', type=int, default=1,
+                        help='Number of sub-prototypes uploaded per class. 1 keeps the original class-mean behavior.')
+    parser.add_argument('--fedfed_min_samples_per_prototype', type=int, default=8,
+                        help='Minimum class samples required per sub-prototype when building multi-prototypes.')
+    parser.add_argument('--fedfed_prototype_kmeans_iters', type=int, default=8,
+                        help='Number of k-means iterations used for multi-prototype construction.')
     parser.add_argument('--fedfed_enable_distill', type=str2bool, default=True,
                         help='Whether to apply prototype distillation loss during local training.')
+    parser.add_argument('--fedfed_enable_contrastive_distill', type=str2bool, default=False,
+                        help='Whether to add supervised contrastive separation against global prototypes.')
+    parser.add_argument('--fedfed_lambda_contrastive', type=float, default=0.05,
+                        help='Weight of global prototype contrastive separation loss.')
+    parser.add_argument('--fedfed_contrastive_temperature', type=float, default=0.2,
+                        help='Temperature used by global prototype contrastive separation loss.')
     parser.add_argument('--fedfed_enable_anchor', type=str2bool, default=True,
                         help='Whether to anchor local features to the round-start model features.')
     parser.add_argument('--fedfed_lambda_anchor', type=float, default=0.1,
