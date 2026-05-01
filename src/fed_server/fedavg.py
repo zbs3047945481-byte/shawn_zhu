@@ -34,12 +34,15 @@ class FedAvgTrainer(BaseFederated):
         )
         plugin_name = resolve_plugin_name(options)
         if plugin_name is not None:
-            print('>>> Plugin ENABLED ({}, sensitive_dim={}, lambda_distill={})'.format(
+            print('>>> Plugin ENABLED ({}, lambda_fd={}, lambda_shared={}, shared_buffer={})'.format(
                 plugin_name,
-                options.get('fedfed_sensitive_dim', 64), options.get('fedfed_lambda_distill', 1.0)))
+                options.get('fedfed_lambda_fd', 1.0),
+                options.get('fedfed_lambda_shared', 1.0),
+                options.get('fedfed_shared_buffer_size', 800)))
 
     def train(self):
         print('>>> Select {} clients per round \n'.format(self._resolve_num_clients_per_round()))
+        self._maybe_run_fedfed_two_stage()
 
         # self.latest_global_model = self.get_model_parameters()
         #self.num_round=通信轮数
@@ -93,6 +96,72 @@ class FedAvgTrainer(BaseFederated):
             raise ValueError('No clients are available for federation.')
         raw_num_clients = int(self.per_round_c_fraction * self.clients_num)
         return min(max(raw_num_clients, 1), self.clients_num)
+
+    def _maybe_run_fedfed_two_stage(self):
+        if self.server_plugin is None:
+            return
+        if self.options.get('plugin_name') != 'fedfed_image':
+            return
+        if not bool(self.options.get('fedfed_two_stage', True)):
+            return
+        if not hasattr(self.server_plugin, 'build_feature_distill_payload'):
+            return
+
+        distill_rounds = max(int(self.options.get('fedfed_distill_rounds', 15)), 0)
+        print('>>> FedFed two-stage: feature distillation rounds = {}'.format(distill_rounds))
+        for round_i in range(distill_rounds):
+            selected_clients = self.select_clients()
+            self.server_plugin.set_round_index(round_i)
+            payload = self.server_plugin.build_feature_distill_payload()
+            local_updates = []
+            for i, client in enumerate(selected_clients, start=1):
+                client.set_model_parameters(self.latest_global_model)
+                client.set_learning_rate(self.optimizer.param_groups[0]['lr'])
+                update, stat = client.plugin_feature_distill(payload)
+                local_updates.append(update)
+                print("Distill: {:>2d} | CID: {: >3d} ({:>2d}/{:>2d})| "
+                      "Loss {:>.4f} | Acc {:>5.2f}% | Time: {:>.2f}s ".format(
+                       round_i, client.id, i, len(selected_clients),
+                       stat['loss'], stat['acc'] * 100, stat['time'], ))
+            self.latest_global_model = self._aggregate_weights_only(local_updates)
+            self.server_plugin.aggregate_generator_states(local_updates)
+
+        self._collect_fedfed_shared_dataset()
+
+    def _collect_fedfed_shared_dataset(self):
+        print('>>> FedFed two-stage: collecting shared performance-sensitive features')
+        self.server_plugin.reset_shared_buffer()
+        payload = self.server_plugin.build_feature_distill_payload()
+        local_updates = []
+        for client in self.clients:
+            client.set_model_parameters(self.latest_global_model)
+            client.set_learning_rate(self.optimizer.param_groups[0]['lr'])
+            local_updates.append(client.plugin_collect_shared_features(payload))
+        self.server_plugin.collect_shared_payloads(local_updates)
+
+    def _aggregate_weights_only(self, local_model_paras_set):
+        averaged_paras = {
+            key: value.detach().clone()
+            for key, value in self.model.state_dict().items()
+        }
+        train_data_num = 0
+        for var in averaged_paras:
+            if averaged_paras[var].is_floating_point():
+                averaged_paras[var].zero_()
+        for update in local_model_paras_set:
+            num_sample = update["num_samples"]
+            local_model_paras = update["weights"]
+            for var in averaged_paras:
+                if averaged_paras[var].is_floating_point():
+                    averaged_paras[var] += num_sample * local_model_paras[var].to(averaged_paras[var].device)
+            train_data_num += num_sample
+        for var in averaged_paras:
+            if averaged_paras[var].is_floating_point():
+                averaged_paras[var] /= train_data_num
+            else:
+                largest_update = max(local_model_paras_set, key=lambda update: update["num_samples"])
+                averaged_paras[var] = largest_update["weights"][var].clone().to(averaged_paras[var].device)
+        return averaged_paras
 
     def _init_early_stop_state(self):
         return {

@@ -1,0 +1,137 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="fedfed-image-client-runtime" name="客户端运行示意图">
+    <mxGraphModel dx="1912" dy="775" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;" value="FedFed Image 插件：客户端运行示意图" vertex="1">
+          <mxGeometry height="50" width="740" x="430" y="25" as="geometry" />
+        </mxCell>
+        <mxCell id="fedavg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=15;fontStyle=1;" value="FedAvg 主流程&lt;br&gt;BaseFederated.local_train()" vertex="1">
+          <mxGeometry height="80" width="240" x="80" y="120" as="geometry" />
+        </mxCell>
+        <mxCell id="model" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="接收全局模型&lt;br&gt;set_model_parameters()" vertex="1">
+          <mxGeometry height="75" width="230" x="380" y="105" as="geometry" />
+        </mxCell>
+        <mxCell id="payload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="接收插件广播&lt;br&gt;set_plugin_payload()" vertex="1">
+          <mxGeometry height="75" width="230" x="380" y="205" as="geometry" />
+        </mxCell>
+        <mxCell id="roundstart" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="on_round_start()&lt;br&gt;同步 generator_state&lt;br&gt;载入 shared_x / shared_y&lt;br&gt;清空本轮上传缓存" vertex="1">
+          <mxGeometry height="120" width="270" x="690" y="155" as="geometry" />
+        </mxCell>
+        <mxCell id="loader" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="本地 DataLoader&lt;br&gt;客户端异构数据 (x, y)" vertex="1">
+          <mxGeometry height="80" width="250" x="80" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="trainbatch" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=15;fontStyle=1;" value="train_batch(X, y)&lt;br&gt;插件替换默认 batch 训练" vertex="1">
+          <mxGeometry height="90" width="270" x="410" y="350" as="geometry" />
+        </mxCell>
+        <mxCell id="localce" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;" value="本地分类&lt;br&gt;pred = f(x)&lt;br&gt;L_local = CE(pred, y)" vertex="1">
+          <mxGeometry height="90" width="210" x="760" y="330" as="geometry" />
+        </mxCell>
+        <mxCell id="split" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=13;fontStyle=1;" value="FedFed 特征分离&lt;br&gt;x_r = q(x; theta)&lt;br&gt;x_s = x - x_r" vertex="1">
+          <mxGeometry height="95" width="220" x="760" y="455" as="geometry" />
+        </mxCell>
+        <mxCell id="fd" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=13;" value="性能敏感特征可判别&lt;br&gt;L_fd = CE(f(x_s), y)" vertex="1">
+          <mxGeometry height="75" width="220" x="1060" y="410" as="geometry" />
+        </mxCell>
+        <mxCell id="norm" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=13;" value="少量关键信息约束&lt;br&gt;L_norm = mean(||x_s||²)" vertex="1">
+          <mxGeometry height="75" width="220" x="1060" y="515" as="geometry" />
+        </mxCell>
+        <mxCell id="shared" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=13;" value="共享特征辅助训练&lt;br&gt;sample(shared_x, shared_y)&lt;br&gt;L_shared = CE(f(shared_x), shared_y)" vertex="1">
+          <mxGeometry height="90" width="270" x="1030" y="290" as="geometry" />
+        </mxCell>
+        <mxCell id="loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="联合损失&lt;br&gt;L = L_local + lambda_fd L_fd&lt;br&gt;+ lambda_norm L_norm + lambda_shared L_shared" vertex="1">
+          <mxGeometry height="95" width="320" x="1080" y="655" as="geometry" />
+        </mxCell>
+        <mxCell id="step" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="optimizer.step()&lt;br&gt;更新本地分类模型 f&lt;br&gt;更新生成器 q" vertex="1">
+          <mxGeometry height="90" width="260" x="720" y="670" as="geometry" />
+        </mxCell>
+        <mxCell id="cache" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=13;" value="缓存待上传 x_s&lt;br&gt;按类限量 fedfed_upload_per_class&lt;br&gt;总量 fedfed_upload_per_client" vertex="1">
+          <mxGeometry height="95" width="270" x="410" y="640" as="geometry" />
+        </mxCell>
+        <mxCell id="upload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="build_upload_payload()&lt;br&gt;generator_state&lt;br&gt;sensitive_x, sensitive_y" vertex="1">
+          <mxGeometry height="95" width="280" x="410" y="810" as="geometry" />
+        </mxCell>
+        <mxCell id="weights" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;" value="上传 FedAvg 权重&lt;br&gt;get_model_parameters_cpu()" vertex="1">
+          <mxGeometry height="75" width="250" x="730" y="825" as="geometry" />
+        </mxCell>
+        <mxCell id="return" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;fontSize=14;fontStyle=1;" value="返回服务器 update&lt;br&gt;{weights, num_samples, aux}" vertex="1">
+          <mxGeometry height="80" width="280" x="1080" y="820" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="fedavg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;" target="model">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="fedavg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;" target="payload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="payload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="roundstart">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="loader" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00695C;" target="trainbatch">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" edge="1" parent="1" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="500" y="305" />
+            </Array>
+            <mxPoint x="500" y="180" as="sourcePoint" />
+            <mxPoint x="525" y="350" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="roundstart" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;" target="shared">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="trainbatch" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" target="localce">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="trainbatch" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" target="split">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="split" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;" target="fd">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="split" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;" target="norm">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="localce" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="loss">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="880" y="630" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="fd" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="norm" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="shared" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;" target="loss">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;" target="step">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="split" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#558B2F;" target="cache">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="cache" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00838F;" target="upload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="step" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00838F;" target="upload">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="step" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;" target="weights">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="upload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C62828;" target="return">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="weights" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C62828;" target="return">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

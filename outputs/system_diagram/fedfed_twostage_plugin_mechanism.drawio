@@ -1,0 +1,94 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="fedfed-twostage-plugin-mechanism" name="两阶段FedFed插件机制">
+    <mxGraphModel dx="1600" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1750" pageHeight="1180" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;align=center;" value="两阶段 FedFed 插件机制原理图" vertex="1">
+          <mxGeometry x="430" y="25" width="860" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="phase1" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F8FBFF;strokeColor=#1565C0;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=10;" value="阶段 1：Feature Distillation，先把生成器 q 训练稳定" vertex="1">
+          <mxGeometry x="60" y="90" width="1630" height="350" as="geometry" />
+        </mxCell>
+        <mxCell id="phase2" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F9FFF9;strokeColor=#2E7D32;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=10;" value="阶段 2：Collect Shared Dataset，用稳定生成器构造共享性能敏感特征集" vertex="1">
+          <mxGeometry x="60" y="470" width="1630" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="phase3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFDF6;strokeColor=#F9A825;strokeWidth=2;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=10;" value="阶段 3：正式 FedAvg 训练，本地数据 + 共享 x_s 共同训练分类模型" vertex="1">
+          <mxGeometry x="60" y="750" width="1630" height="330" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p1_server" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="服务器广播&lt;br&gt;全局分类器 f_t&lt;br&gt;全局生成器 q_t" vertex="1">
+          <mxGeometry x="110" y="160" width="210" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_client_data" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="客户端本地 batch&lt;br&gt;x, y" vertex="1">
+          <mxGeometry x="390" y="160" width="190" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_generator" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="β-VAE 生成器 q(x)&lt;br&gt;显式生成性能鲁棒部分&lt;br&gt;x_r = q(x)" vertex="1">
+          <mxGeometry x="660" y="145" width="270" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_xs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=14;fontStyle=1;" value="隐式得到性能敏感特征&lt;br&gt;x_s = x - q(x)" vertex="1">
+          <mxGeometry x="1010" y="160" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_rho" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=13;fontStyle=1;" value="ρ 范数约束 / 裁剪&lt;br&gt;||x_s|| ≤ ρ ||x||&lt;br&gt;默认 ρ = 0.3" vertex="1">
+          <mxGeometry x="1320" y="145" width="250" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;fontSize=13;fontStyle=1;" value="蒸馏阶段目标&lt;br&gt;L_distill = λ_fd CE(f(x_s), y)&lt;br&gt;+ λ_ρ max(||x_s|| - ρ||x||, 0)^2&lt;br&gt;+ β_kl L_kl" vertex="1">
+          <mxGeometry x="570" y="305" width="430" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p1_agg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#3F51B5;fontSize=13;fontStyle=1;" value="客户端上传蒸馏后的&lt;br&gt;model weights + generator_state&lt;br&gt;服务器加权聚合 f 和 q&lt;br&gt;循环 fedfed_distill_rounds=15" vertex="1">
+          <mxGeometry x="1110" y="300" width="360" height="110" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p2_fixed_q" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="使用蒸馏稳定后的 q&lt;br&gt;不再把早期低质量 x_s 入池" vertex="1">
+          <mxGeometry x="130" y="555" width="300" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_generate" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=14;fontStyle=1;" value="每个客户端生成&lt;br&gt;x_s = clip(x - q(x))&lt;br&gt;并带标签 y 上传" vertex="1">
+          <mxGeometry x="520" y="545" width="280" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_pool" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="服务器构造共享集 D_s&lt;br&gt;per-class FIFO&lt;br&gt;shared_x, shared_y" vertex="1">
+          <mxGeometry x="910" y="545" width="300" height="105" as="geometry" />
+        </mxCell>
+        <mxCell id="p2_broadcast" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="广播共享特征集&lt;br&gt;给后续正式训练客户端&lt;br&gt;作为额外训练数据" vertex="1">
+          <mxGeometry x="1320" y="545" width="270" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="p3_local" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="本地真实数据路径&lt;br&gt;pred = f(x)&lt;br&gt;L_local = CE(f(x), y)" vertex="1">
+          <mxGeometry x="150" y="835" width="280" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_shared" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="共享性能敏感特征路径&lt;br&gt;sample shared_x_s, shared_y&lt;br&gt;L_shared = CE(f(shared_x_s), shared_y)" vertex="1">
+          <mxGeometry x="540" y="825" width="340" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_no_online" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;fontStyle=1;" value="默认关闭正式阶段在线蒸馏&lt;br&gt;fedfed_formal_online_distill=false&lt;br&gt;避免 q、池子、分类器互相干扰" vertex="1">
+          <mxGeometry x="1000" y="825" width="310" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="正式训练目标&lt;br&gt;L_train = L_local + λ_shared L_shared&lt;br&gt;默认 λ_shared = 0.2" vertex="1">
+          <mxGeometry x="1390" y="835" width="250" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="p3_fedavg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="客户端上传模型参数&lt;br&gt;服务器按样本数 FedAvg 聚合&lt;br&gt;得到下一轮全局模型 f" vertex="1">
+          <mxGeometry x="680" y="970" width="400" height="80" as="geometry" />
+        </mxCell>
+
+        <mxCell id="note_problem" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=13;" value="解决的问题：旧在线版会把早期低质量 x_s 放入池子，并在后续轮次广播放大噪声。现在先蒸馏稳定 q，再一次性构造共享集，正式训练只使用稳定共享特征。" vertex="1">
+          <mxGeometry x="120" y="1095" width="1480" height="55" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="p1_server" target="p1_client_data" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="p1_client_data" target="p1_generator" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00695C;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="p1_generator" target="p1_xs" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="p1_xs" target="p1_rho" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="p1_rho" target="p1_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="p1_loss" target="p1_agg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C62828;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="p1_agg" target="p2_fixed_q" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#3F51B5;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="p2_fixed_q" target="p2_generate" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="p2_generate" target="p2_pool" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="p2_pool" target="p2_broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="p2_broadcast" target="p3_shared" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="p3_local" target="p3_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="p3_shared" target="p3_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="p3_loss" target="p3_fedavg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

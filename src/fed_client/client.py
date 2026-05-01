@@ -64,6 +64,85 @@ class BaseClient():
         update = {"weights": local_model_paras, "num_samples": len(self.local_dataset), "aux": aux}
         return update, stats
 
+    def plugin_feature_distill(self, payload):
+        if self.plugin is None or not hasattr(self.plugin, 'distill_batch'):
+            raise RuntimeError('Current plugin does not support feature distillation.')
+        begin_time = time.time()
+        self._move_to_training_device()
+        try:
+            update, stats = self._plugin_feature_distill_update(payload)
+        finally:
+            self._move_to_storage_device()
+        stats['time'] = round(time.time() - begin_time, 2)
+        return update, stats
+
+    def _plugin_feature_distill_update(self, payload):
+        pin_memory = self.gpu and self.options.get('dataloader_pin_memory', True)
+        loader = DataLoader(
+            self.local_dataset,
+            batch_size=self.options['batch_size'],
+            shuffle=True,
+            num_workers=max(int(self.options.get('dataloader_num_workers', 0)), 0),
+            pin_memory=pin_memory,
+        )
+        self.model.train()
+        self.plugin.on_distill_start(self.optimizer.param_groups[0]['lr'], payload)
+        train_loss = train_acc = train_total = 0
+        local_epoch = int(self.options.get('fedfed_distill_local_epoch', 1))
+        for _ in range(local_epoch):
+            for X, y in loader:
+                if self.gpu:
+                    X = X.to(self.device, non_blocking=pin_memory)
+                    y = y.to(self.device, non_blocking=pin_memory)
+                pred, loss = self.plugin.distill_batch(X, y)
+                _, predicted = torch.max(pred, 1)
+                train_acc += predicted.eq(y).sum().item()
+                train_loss += loss.item() * y.size(0)
+                train_total += y.size(0)
+        update = {
+            "weights": self.get_model_parameters_cpu(),
+            "num_samples": len(self.local_dataset),
+            "aux": self.plugin.build_upload_payload(),
+        }
+        stats = {
+            "id": self.id,
+            "loss": train_loss / max(train_total, 1),
+            "acc": train_acc / max(train_total, 1),
+        }
+        return update, stats
+
+    def plugin_collect_shared_features(self, payload):
+        if self.plugin is None or not hasattr(self.plugin, 'collect_shared_batch'):
+            raise RuntimeError('Current plugin does not support shared feature collection.')
+        self._move_to_training_device()
+        try:
+            update = self._plugin_collect_shared_features(payload)
+        finally:
+            self._move_to_storage_device()
+        return update
+
+    def _plugin_collect_shared_features(self, payload):
+        pin_memory = self.gpu and self.options.get('dataloader_pin_memory', True)
+        loader = DataLoader(
+            self.local_dataset,
+            batch_size=self.options['batch_size'],
+            shuffle=True,
+            num_workers=max(int(self.options.get('dataloader_num_workers', 0)), 0),
+            pin_memory=pin_memory,
+        )
+        self.model.eval()
+        self.plugin.on_distill_start(self.optimizer.param_groups[0]['lr'], payload)
+        for X, y in loader:
+            if self.gpu:
+                X = X.to(self.device, non_blocking=pin_memory)
+                y = y.to(self.device, non_blocking=pin_memory)
+            self.plugin.collect_shared_batch(X, y)
+        return {
+            "weights": self.get_model_parameters_cpu(),
+            "num_samples": len(self.local_dataset),
+            "aux": self.plugin.build_upload_payload(),
+        }
+
     def local_update(self, local_dataset, options, ):
         use_plugin = self.plugin is not None
         pin_memory = self.gpu and options.get('dataloader_pin_memory', True)

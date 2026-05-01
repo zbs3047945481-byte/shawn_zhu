@@ -1,0 +1,107 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="fedfed-image-plugin-mechanism" name="FedFed插件机制原理图">
+    <mxGraphModel dx="1600" dy="980" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1700" pageHeight="1150" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=28;fontStyle=1;align=center;" value="FedFed Image Plugin 机制原理图" vertex="1">
+          <mxGeometry x="430" y="25" width="840" height="50" as="geometry" />
+        </mxCell>
+
+        <mxCell id="server_band" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F6F8FA;strokeColor=#B0BEC5;dashed=1;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=10;" value="服务器端：FedAvg 主干 + FedFed 插件状态维护" vertex="1">
+          <mxGeometry x="80" y="90" width="1540" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="client_band" parent="1" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#B0BEC5;dashed=1;fontSize=16;fontStyle=1;verticalAlign=top;align=left;spacingLeft=14;spacingTop=10;" value="客户端端：本地训练 + 图像空间特征蒸馏" vertex="1">
+          <mxGeometry x="80" y="380" width="1540" height="650" as="geometry" />
+        </mxCell>
+
+        <mxCell id="global_model" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=14;fontStyle=1;" value="全局分类模型 f&lt;br&gt;FedAvg 聚合得到" vertex="1">
+          <mxGeometry x="130" y="150" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="global_generator" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="全局 β-VAE 生成器 q&lt;br&gt;generator_state 聚合得到" vertex="1">
+          <mxGeometry x="430" y="150" width="270" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="shared_pool" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="按类维护的共享特征池&lt;br&gt;per-class FIFO&lt;br&gt;每类最多 fedfed_shared_per_class_size" vertex="1">
+          <mxGeometry x="780" y="135" width="330" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="server_broadcast" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="广播给客户端&lt;br&gt;global weights&lt;br&gt;generator_state&lt;br&gt;shared_x, shared_y" vertex="1">
+          <mxGeometry x="1210" y="140" width="270" height="100" as="geometry" />
+        </mxCell>
+
+        <mxCell id="round_gate" parent="1" style="rhombus;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="当前轮次 &lt; hard warmup?" vertex="1">
+          <mxGeometry x="130" y="430" width="190" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="warmup_note" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=13;" value="Warmup 阶段&lt;br&gt;只训练本地 f 和 q&lt;br&gt;聚合 q&lt;br&gt;不上传/不使用 shared_x" vertex="1">
+          <mxGeometry x="120" y="610" width="230" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="input_x" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="本地数据 batch&lt;br&gt;x, y" vertex="1">
+          <mxGeometry x="410" y="430" width="190" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="classifier_local" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=13;" value="正常分类路径&lt;br&gt;pred = f(x)&lt;br&gt;L_local = CE(pred, y)" vertex="1">
+          <mxGeometry x="700" y="410" width="230" height="90" as="geometry" />
+        </mxCell>
+
+        <mxCell id="vae" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=14;fontStyle=1;" value="β-VAE 生成器 q(x)&lt;br&gt;Encoder: μ, logσ²&lt;br&gt;Reparameterize&lt;br&gt;Decoder 输出 x_r" vertex="1">
+          <mxGeometry x="690" y="560" width="250" height="125" as="geometry" />
+        </mxCell>
+        <mxCell id="xr" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=13;" value="性能鲁棒/重构部分&lt;br&gt;x_r = q(x)" vertex="1">
+          <mxGeometry x="1030" y="565" width="210" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="xs" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=14;fontStyle=1;" value="性能敏感特征&lt;br&gt;x_s = x - q(x)" vertex="1">
+          <mxGeometry x="1030" y="680" width="210" height="75" as="geometry" />
+        </mxCell>
+
+        <mxCell id="fd_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;fontSize=13;" value="特征蒸馏分类约束&lt;br&gt;L_fd = CE(f(x_s), y)&lt;br&gt;让 x_s 保留分类有用信息" vertex="1">
+          <mxGeometry x="1320" y="610" width="260" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="norm_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;" value="弱信息量约束&lt;br&gt;L_norm = mean(||x_s||²)&lt;br&gt;当前权重很低: 0.001" vertex="1">
+          <mxGeometry x="1320" y="730" width="260" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="vae_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=13;" value="β-VAE 稳定项&lt;br&gt;L_recon = MSE(q(x), x)&lt;br&gt;L_kl = KL(z || N(0, I))" vertex="1">
+          <mxGeometry x="1320" y="840" width="260" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="shared_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=13;" value="共享特征辅助分类&lt;br&gt;从 shared_x, shared_y 采样&lt;br&gt;L_shared = CE(f(shared_x), shared_y)" vertex="1">
+          <mxGeometry x="700" y="790" width="280" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="total_loss" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="联合优化目标&lt;br&gt;L = L_local + 0.3 L_fd + 0.001 L_norm&lt;br&gt;+ 0.2 L_shared + 0.05 L_recon + 0.001 L_kl" vertex="1">
+          <mxGeometry x="1020" y="910" width="390" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="upload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="客户端上传 aux payload&lt;br&gt;generator_state&lt;br&gt;sensitive_x = x_s&lt;br&gt;sensitive_y = y" vertex="1">
+          <mxGeometry x="410" y="900" width="270" height="105" as="geometry" />
+        </mxCell>
+
+        <mxCell id="server_agg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=13;" value="服务器聚合&lt;br&gt;1. FedAvg 聚合分类模型 f&lt;br&gt;2. 加权平均生成器 q&lt;br&gt;3. x_s 按类别进入 FIFO 池" vertex="1">
+          <mxGeometry x="1180" y="265" width="350" height="95" as="geometry" />
+        </mxCell>
+
+        <mxCell id="e1" edge="1" parent="1" source="global_model" target="server_broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="global_generator" target="server_broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="shared_pool" target="server_broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="server_broadcast" target="round_gate" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1345" y="330" /><mxPoint x="225" y="330" /></Array></mxGeometry></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="round_gate" target="warmup_note" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;" value="是"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="round_gate" target="input_x" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00695C;" value="否/继续本地训练"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="input_x" target="classifier_local" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="input_x" target="vae" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="vae" target="xr" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="xr" target="xs" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;" value="x - x_r"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="xs" target="fd_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C62828;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="xs" target="norm_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="vae" target="vae_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="815" y="940" /></Array></mxGeometry></mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="server_broadcast" target="shared_loss" style="endArrow=block;html=1;dashed=1;strokeWidth=2;strokeColor=#0277BD;" value="warmup 后使用"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1460" y="370" /><mxPoint x="840" y="370" /></Array></mxGeometry></mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="classifier_local" target="total_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="815" y="1010" /></Array></mxGeometry></mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="fd_loss" target="total_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="norm_loss" target="total_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="vae_loss" target="total_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="shared_loss" target="total_loss" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="xs" target="upload" style="endArrow=block;html=1;dashed=1;strokeWidth=2;strokeColor=#00838F;" value="warmup 后上传"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1135" y="850" /><mxPoint x="545" y="850" /></Array></mxGeometry></mxCell>
+        <mxCell id="e21" edge="1" parent="1" source="upload" target="server_agg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00838F;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="545" y="1090" /><mxPoint x="1580" y="1090" /><mxPoint x="1580" y="310" /></Array></mxGeometry></mxCell>
+        <mxCell id="e22" edge="1" parent="1" source="server_agg" target="global_model" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1190" y="300" /><mxPoint x="245" y="300" /></Array></mxGeometry></mxCell>
+        <mxCell id="e23" edge="1" parent="1" source="server_agg" target="global_generator" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e24" edge="1" parent="1" source="server_agg" target="shared_pool" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

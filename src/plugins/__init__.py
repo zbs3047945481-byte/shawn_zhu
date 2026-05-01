@@ -2,12 +2,17 @@
 
 from src.plugins.base import BaseClientPlugin, BaseServerPlugin
 from src.plugins.fedfed_plugin import FedFedClientPlugin, FedFedServerPlugin
+from src.plugins.fedfed_image_plugin import FedFedImageClientPlugin, FedFedImageServerPlugin
 
 
 PLUGIN_REGISTRY = {
     'fedfed_prototype': {
         'client': FedFedClientPlugin,
         'server': FedFedServerPlugin,
+    },
+    'fedfed_image': {
+        'client': FedFedImageClientPlugin,
+        'server': FedFedImageServerPlugin,
     },
 }
 
@@ -17,7 +22,7 @@ def resolve_plugin_name(options):
     if plugin_name != 'none':
         return plugin_name
     if options.get('use_fedfed_plugin', False):
-        return 'fedfed_prototype'
+        return 'fedfed_image'
     return None
 
 
@@ -44,6 +49,8 @@ __all__ = [
     'BaseServerPlugin',
     'FedFedClientPlugin',
     'FedFedServerPlugin',
+    'FedFedImageClientPlugin',
+    'FedFedImageServerPlugin',
     'build_client_plugin',
     'build_server_plugin',
     'resolve_plugin_name',

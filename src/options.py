@@ -37,10 +37,10 @@ def input_options():
     parser.add_argument('--round_num', type=int, default=301, help='number of round in comm')
     #通信轮数：每一轮 = 一次 FedAvg 聚合
     
-    parser.add_argument('--num_of_clients', type=int, default=100, help='numer of the clients')
+    parser.add_argument('--num_of_clients', type=int, default=20, help='numer of the clients')
     #联邦系统中的客户端总数 K
     
-    parser.add_argument('--c_fraction', type=float, default=0.1,
+    parser.add_argument('--c_fraction', type=float, default=0.2,
                         help='C fraction, 0 means 1 client, 1 means total clients')
     #每一轮参与训练的客户端比例
     
@@ -48,7 +48,7 @@ def input_options():
     #每个客户端本地训练多少个 epoch
     #比如有1000条数据，把这1000个数据全部用来算一次梯度并更新参数，这完整一轮叫一个epoch
 
-    parser.add_argument('--batch_size', type=int, default=32, help='local train batch size')
+    parser.add_argument('--batch_size', type=int, default=256, help='local train batch size')
     #本地训练 batch size
     #每次梯度更新用多少条样本
     #比如有1000条数据，每轮训练只取100条数据来算梯度并更新参数，这100条数据叫一个batch
@@ -118,8 +118,48 @@ def input_options():
     parser.add_argument('--use_fedfed_plugin', type=str2bool, default=False,
                         help='Enable FedFed-style feature distillation plugin.')
     parser.add_argument('--plugin_name', type=str, default='none',
-                        choices=['none', 'fedfed_prototype'],
+                        choices=['none', 'fedfed_prototype', 'fedfed_image'],
                         help='Generic plugin selector. Prefer this over algorithm-specific toggles for new code.')
+    parser.add_argument('--fedfed_input_channels', type=int, default=3,
+                        help='Input channels used by image-space FedFed generator.')
+    parser.add_argument('--fedfed_lambda_fd', type=float, default=0.3,
+                        help='Weight of CE(f(x - q(x)), y) for image-space FedFed feature distillation.')
+    parser.add_argument('--fedfed_lambda_norm', type=float, default=0.001,
+                        help='Weight of the ||x - q(x)||^2 penalty for image-space FedFed.')
+    parser.add_argument('--fedfed_lambda_shared', type=float, default=0.2,
+                        help='Weight of CE on server-shared performance-sensitive features.')
+    parser.add_argument('--fedfed_two_stage', type=str2bool, default=True,
+                        help='Run paper-style FedFed: feature distillation first, then FedAvg over local plus shared features.')
+    parser.add_argument('--fedfed_distill_rounds', type=int, default=15,
+                        help='Communication rounds used for the feature distillation stage.')
+    parser.add_argument('--fedfed_distill_local_epoch', type=int, default=1,
+                        help='Local epochs used in each feature distillation round.')
+    parser.add_argument('--fedfed_rho', type=float, default=0.3,
+                        help='Relative norm budget rho for ||x_s|| <= rho * ||x|| in feature distillation.')
+    parser.add_argument('--fedfed_lambda_rho', type=float, default=10.0,
+                        help='Hinge penalty weight for violating the rho norm budget before clipping.')
+    parser.add_argument('--fedfed_formal_online_distill', type=str2bool, default=False,
+                        help='If false in two-stage mode, formal FedAvg only uses CE(x) and CE(shared_x_s).')
+    parser.add_argument('--fedfed_hard_warmup_rounds', type=int, default=10,
+                        help='Rounds used only for feature distillation before uploading/using shared x_s.')
+    parser.add_argument('--fedfed_vae_latent_channels', type=int, default=64,
+                        help='Latent channel width of the image-space beta-VAE generator.')
+    parser.add_argument('--fedfed_lambda_recon', type=float, default=0.05,
+                        help='Weight of reconstruction loss that keeps q(x) close to x.')
+    parser.add_argument('--fedfed_beta_kl', type=float, default=0.001,
+                        help='KL weight for the beta-VAE generator.')
+    parser.add_argument('--fedfed_upload_per_class', type=int, default=4,
+                        help='Max sensitive samples uploaded by one client for each class in one round.')
+    parser.add_argument('--fedfed_upload_per_client', type=int, default=40,
+                        help='Max sensitive samples uploaded by one client in one round.')
+    parser.add_argument('--fedfed_shared_buffer_size', type=int, default=800,
+                        help='Max number of server-side shared sensitive samples.')
+    parser.add_argument('--fedfed_shared_per_class_size', type=int, default=80,
+                        help='Max server-side shared sensitive samples kept per class by FIFO.')
+    parser.add_argument('--fedfed_shared_batch_size', type=int, default=256,
+                        help='Batch size sampled from the shared sensitive feature buffer.')
+    parser.add_argument('--fedfed_generator_weight_decay', type=float, default=0.0,
+                        help='Weight decay for image-space FedFed generator optimizer.')
     parser.add_argument('--fedfed_sensitive_dim', type=int, default=64,
                         help='Dimension of performance-sensitive feature z_s (shared).')
     parser.add_argument('--fedfed_feature_dim', type=int, default=512,

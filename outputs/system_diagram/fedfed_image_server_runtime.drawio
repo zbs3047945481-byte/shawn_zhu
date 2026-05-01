@@ -1,0 +1,81 @@
+<mxfile host="app.diagrams.net" agent="Codex">
+  <diagram id="fedfed-image-server-runtime" name="服务器端运行示意图">
+    <mxGraphModel dx="1500" dy="900" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1050" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="title" parent="1" style="text;html=1;strokeColor=none;fillColor=none;fontSize=26;fontStyle=1;align=center;" value="FedFed Image 插件：服务器端运行示意图" vertex="1">
+          <mxGeometry x="430" y="25" width="740" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="trainer" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=15;fontStyle=1;" value="FedAvgTrainer.train()&lt;br&gt;通信轮控制" vertex="1">
+          <mxGeometry x="90" y="120" width="240" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="select" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E1F5FE;strokeColor=#0277BD;fontSize=14;fontStyle=1;" value="select_clients()&lt;br&gt;每轮抽样客户端" vertex="1">
+          <mxGeometry x="420" y="120" width="230" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="broadcast" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="local_train() 下发&lt;br&gt;全局模型 weights&lt;br&gt;插件 payload" vertex="1">
+          <mxGeometry x="740" y="110" width="250" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="updates" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#7B1FA2;fontSize=14;fontStyle=1;" value="客户端返回 updates&lt;br&gt;{weights, num_samples, aux}" vertex="1">
+          <mxGeometry x="1090" y="120" width="280" height="85" as="geometry" />
+        </mxCell>
+        <mxCell id="weights" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;" value="weights&lt;br&gt;本地分类模型参数" vertex="1">
+          <mxGeometry x="130" y="310" width="210" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="samples" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ECEFF1;strokeColor=#455A64;fontSize=13;" value="num_samples&lt;br&gt;FedAvg 加权依据" vertex="1">
+          <mxGeometry x="130" y="415" width="210" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="auxg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=13;" value="aux.generator_state&lt;br&gt;客户端 q(x) 状态" vertex="1">
+          <mxGeometry x="130" y="555" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="auxx" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#512DA8;fontSize=13;" value="aux.sensitive_x / y&lt;br&gt;性能敏感特征样本" vertex="1">
+          <mxGeometry x="130" y="665" width="220" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="fedavgagg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=14;fontStyle=1;" value="aggregate_parameters()&lt;br&gt;按样本数加权平均" vertex="1">
+          <mxGeometry x="470" y="345" width="270" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="globalmodel" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=14;fontStyle=1;" value="latest_global_model&lt;br&gt;更新全局分类模型 f" vertex="1">
+          <mxGeometry x="820" y="350" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="pluginagg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=14;fontStyle=1;" value="FedFedImageServerPlugin&lt;br&gt;aggregate_client_payloads()" vertex="1">
+          <mxGeometry x="460" y="590" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="genagg" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#C2185B;fontSize=13;" value="聚合生成器 q&lt;br&gt;浮点参数按 num_samples 加权平均&lt;br&gt;得到全局 generator_state" vertex="1">
+          <mxGeometry x="850" y="535" width="310" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="buffer" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=13;" value="维护共享敏感特征池&lt;br&gt;追加 sensitive_x / y&lt;br&gt;超过 fedfed_shared_buffer_size 则采样保留" vertex="1">
+          <mxGeometry x="850" y="675" width="340" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="payload" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F7FA;strokeColor=#00838F;fontSize=14;fontStyle=1;" value="build_broadcast_payload()&lt;br&gt;round_index&lt;br&gt;generator_state&lt;br&gt;shared_x, shared_y" vertex="1">
+          <mxGeometry x="1250" y="585" width="260" height="115" as="geometry" />
+        </mxCell>
+        <mxCell id="next" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFDE7;strokeColor=#F9A825;fontSize=14;fontStyle=1;" value="下一轮广播&lt;br&gt;模型权重 + 插件 payload" vertex="1">
+          <mxGeometry x="1080" y="850" width="280" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="eval" parent="1" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;fontSize=14;fontStyle=1;" value="test_latest_model_on_testdata()&lt;br&gt;记录 final acc / best acc / loss&lt;br&gt;支持早停判断" vertex="1">
+          <mxGeometry x="470" y="845" width="330" height="95" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" edge="1" parent="1" source="trainer" target="select" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#1565C0;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e2" edge="1" parent="1" source="select" target="broadcast" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#0277BD;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e3" edge="1" parent="1" source="broadcast" target="updates" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#7B1FA2;" value="客户端本地训练后返回"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e4" edge="1" parent="1" source="updates" target="weights" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1230" y="260" /><mxPoint x="235" y="260" /></Array></mxGeometry></mxCell>
+        <mxCell id="e5" edge="1" parent="1" source="updates" target="samples" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#455A64;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1230" y="285" /><mxPoint x="235" y="285" /></Array></mxGeometry></mxCell>
+        <mxCell id="e6" edge="1" parent="1" source="updates" target="auxg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1240" y="520" /><mxPoint x="240" y="520" /></Array></mxGeometry></mxCell>
+        <mxCell id="e7" edge="1" parent="1" source="updates" target="auxx" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#512DA8;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1240" y="640" /><mxPoint x="240" y="640" /></Array></mxGeometry></mxCell>
+        <mxCell id="e8" edge="1" parent="1" source="weights" target="fedavgagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e9" edge="1" parent="1" source="samples" target="fedavgagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#2E7D32;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e10" edge="1" parent="1" source="fedavgagg" target="globalmodel" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00695C;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e11" edge="1" parent="1" source="auxg" target="pluginagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e12" edge="1" parent="1" source="auxx" target="pluginagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#EF6C00;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e13" edge="1" parent="1" source="pluginagg" target="genagg" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C2185B;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e14" edge="1" parent="1" source="pluginagg" target="buffer" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#558B2F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e15" edge="1" parent="1" source="genagg" target="payload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00838F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e16" edge="1" parent="1" source="buffer" target="payload" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#00838F;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e17" edge="1" parent="1" source="globalmodel" target="next" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="950" y="820" /></Array></mxGeometry></mxCell>
+        <mxCell id="e18" edge="1" parent="1" source="payload" target="next" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#F9A825;"><mxGeometry relative="1" as="geometry" /></mxCell>
+        <mxCell id="e19" edge="1" parent="1" source="next" target="broadcast" style="endArrow=block;html=1;dashed=1;strokeWidth=2;strokeColor=#F9A825;" value="下一通信轮"><mxGeometry relative="1" as="geometry"><Array as="points"><mxPoint x="1220" y="980" /><mxPoint x="865" y="980" /></Array></mxGeometry></mxCell>
+        <mxCell id="e20" edge="1" parent="1" source="globalmodel" target="eval" style="endArrow=block;html=1;strokeWidth=2;strokeColor=#C62828;"><mxGeometry relative="1" as="geometry" /></mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

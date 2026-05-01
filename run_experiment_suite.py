@@ -14,7 +14,11 @@ from src.utils.plotting import plotting_available, save_ablation_summary_plot, s
 SUITES = {
     'baseline_vs_plugin': [
         {'label': 'FedAvg', 'args': ['--plugin_name', 'none']},
-        {'label': 'FedFedPrototype', 'args': ['--plugin_name', 'fedfed_prototype']},
+        {'label': 'FedFedImage', 'args': ['--plugin_name', 'fedfed_image']},
+    ],
+    'fedfed_image_main': [
+        {'label': 'FedAvg_alpha_0.3', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '0.3']},
+        {'label': 'FedFedImage_alpha_0.3', 'args': ['--plugin_name', 'fedfed_image', '--dirichlet_alpha', '0.3']},
     ],
     'fedavg_alpha_main': [
         {'label': 'FedAvg_alpha_1.0', 'args': ['--plugin_name', 'none', '--dirichlet_alpha', '1.0']},
@@ -129,10 +133,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description='Run batch FL experiment suites and generate comparison plots.')
     parser.add_argument('--suite', choices=sorted(SUITES.keys()), required=True, help='Predefined experiment suite to run.')
     parser.add_argument('--round_num', type=int, default=5, help='Rounds for each experiment.')
-    parser.add_argument('--num_of_clients', type=int, default=10, help='Total clients.')
+    parser.add_argument('--num_of_clients', type=int, default=20, help='Total clients.')
     parser.add_argument('--c_fraction', type=float, default=0.2, help='Fraction of clients per round.')
     parser.add_argument('--local_epoch', type=int, default=1, help='Local epochs.')
-    parser.add_argument('--batch_size', type=int, default=64, help='Local batch size.')
+    parser.add_argument('--batch_size', type=int, default=256, help='Local batch size.')
     parser.add_argument('--gpu', type=str2bool, default=True, help='Whether to use GPU.')
     parser.add_argument('--dataset_name', type=str, default='mnist', help='Dataset name.')
     parser.add_argument('--dirichlet_alpha', type=float, default=0.3, help='Dirichlet alpha used in shared base settings.')
