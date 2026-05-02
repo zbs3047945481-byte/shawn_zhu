@@ -88,6 +88,7 @@ class BaseClient():
         self.model.train()
         self.plugin.on_distill_start(self.optimizer.param_groups[0]['lr'], payload)
         train_loss = train_acc = train_total = 0
+        fd_loss_sum = rho_penalty_sum = xs_norm_sum = kl_loss_sum = 0.0
         local_epoch = int(self.options.get('fedfed_distill_local_epoch', 1))
         for _ in range(local_epoch):
             for X, y in loader:
@@ -95,9 +96,14 @@ class BaseClient():
                     X = X.to(self.device, non_blocking=pin_memory)
                     y = y.to(self.device, non_blocking=pin_memory)
                 pred, loss = self.plugin.distill_batch(X, y)
+                distill_stats = getattr(self.plugin, 'last_distill_stats', {})
                 _, predicted = torch.max(pred, 1)
                 train_acc += predicted.eq(y).sum().item()
                 train_loss += loss.item() * y.size(0)
+                fd_loss_sum += float(distill_stats.get('fd_loss', 0.0)) * y.size(0)
+                rho_penalty_sum += float(distill_stats.get('rho_penalty', 0.0)) * y.size(0)
+                xs_norm_sum += float(distill_stats.get('xs_norm', 0.0)) * y.size(0)
+                kl_loss_sum += float(distill_stats.get('kl_loss', 0.0)) * y.size(0)
                 train_total += y.size(0)
         update = {
             "weights": self.get_model_parameters_cpu(),
@@ -108,6 +114,10 @@ class BaseClient():
             "id": self.id,
             "loss": train_loss / max(train_total, 1),
             "acc": train_acc / max(train_total, 1),
+            "fd_loss": fd_loss_sum / max(train_total, 1),
+            "rho_penalty": rho_penalty_sum / max(train_total, 1),
+            "xs_norm": xs_norm_sum / max(train_total, 1),
+            "kl_loss": kl_loss_sum / max(train_total, 1),
         }
         return update, stats
 

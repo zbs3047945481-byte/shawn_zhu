@@ -87,13 +87,19 @@ function Run-One(\$alpha, \$epoch, \$name, \$pluginName) {
     '--dirichlet_alpha', \$alpha,
     '--min_samples_per_client', '1',
     '--enable_quantity_skew', 'false',
-    '--enable_feature_skew', 'true',
+    '--enable_feature_skew', 'false',
     '--lr', '0.001',
     '--early_stop_enable', 'true',
     '--early_stop_min_rounds', '40',
     '--early_stop_patience', '20',
     '--early_stop_min_delta', '0.002',
     '--plugin_name', \$pluginName,
+    '--fedfed_distill_rounds', '30',
+    '--fedfed_distill_local_epoch', '2',
+    '--fedfed_upload_per_class', '20',
+    '--fedfed_upload_per_client', '200',
+    '--fedfed_shared_buffer_size', '4000',
+    '--fedfed_shared_per_class_size', '400',
     '--experiment_tag', \$runId
   )
 

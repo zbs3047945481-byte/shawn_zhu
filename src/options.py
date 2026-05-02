@@ -91,11 +91,11 @@ def input_options():
                         help='Whether to let dirichlet_alpha jointly control label, quantity, and feature heterogeneity.')
     parser.add_argument('--min_samples_per_client', type=int, default=32,
                         help='Ensure each client owns at least this many training samples.')
-    parser.add_argument('--enable_quantity_skew', type=str2bool, default=True,
+    parser.add_argument('--enable_quantity_skew', type=str2bool, default=False,
                         help='Whether to vary client dataset sizes.')
     parser.add_argument('--quantity_skew_beta', type=float, default=0.5,
                         help='Dirichlet beta for client quantity skew. Smaller means more imbalance.')
-    parser.add_argument('--enable_feature_skew', type=str2bool, default=True,
+    parser.add_argument('--enable_feature_skew', type=str2bool, default=False,
                         help='Whether to apply client-specific feature shift/noise.')
     parser.add_argument('--feature_alpha_anchor', type=float, default=0.1,
                         help='Reference alpha that corresponds to the strongest feature skew when alpha is unified.')
@@ -130,9 +130,9 @@ def input_options():
                         help='Weight of CE on server-shared performance-sensitive features.')
     parser.add_argument('--fedfed_two_stage', type=str2bool, default=True,
                         help='Run paper-style FedFed: feature distillation first, then FedAvg over local plus shared features.')
-    parser.add_argument('--fedfed_distill_rounds', type=int, default=15,
+    parser.add_argument('--fedfed_distill_rounds', type=int, default=30,
                         help='Communication rounds used for the feature distillation stage.')
-    parser.add_argument('--fedfed_distill_local_epoch', type=int, default=1,
+    parser.add_argument('--fedfed_distill_local_epoch', type=int, default=2,
                         help='Local epochs used in each feature distillation round.')
     parser.add_argument('--fedfed_rho', type=float, default=0.3,
                         help='Relative norm budget rho for ||x_s|| <= rho * ||x|| in feature distillation.')
@@ -148,13 +148,13 @@ def input_options():
                         help='Weight of reconstruction loss that keeps q(x) close to x.')
     parser.add_argument('--fedfed_beta_kl', type=float, default=0.001,
                         help='KL weight for the beta-VAE generator.')
-    parser.add_argument('--fedfed_upload_per_class', type=int, default=4,
+    parser.add_argument('--fedfed_upload_per_class', type=int, default=20,
                         help='Max sensitive samples uploaded by one client for each class in one round.')
-    parser.add_argument('--fedfed_upload_per_client', type=int, default=40,
+    parser.add_argument('--fedfed_upload_per_client', type=int, default=200,
                         help='Max sensitive samples uploaded by one client in one round.')
-    parser.add_argument('--fedfed_shared_buffer_size', type=int, default=800,
+    parser.add_argument('--fedfed_shared_buffer_size', type=int, default=4000,
                         help='Max number of server-side shared sensitive samples.')
-    parser.add_argument('--fedfed_shared_per_class_size', type=int, default=80,
+    parser.add_argument('--fedfed_shared_per_class_size', type=int, default=400,
                         help='Max server-side shared sensitive samples kept per class by FIFO.')
     parser.add_argument('--fedfed_shared_batch_size', type=int, default=256,
                         help='Batch size sampled from the shared sensitive feature buffer.')

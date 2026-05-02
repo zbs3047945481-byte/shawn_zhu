@@ -27,6 +27,7 @@ class FedFedImageClientPlugin(BaseClientPlugin):
         self.upload_y = []
         self.upload_counts = {}
         self.in_warmup = False
+        self.last_distill_stats = {}
 
     def _resolve_input_channels(self):
         dataset_name = str(self.options.get('dataset_name', '')).lower()
@@ -183,6 +184,7 @@ class FedFedImageClientPlugin(BaseClientPlugin):
         pred_sensitive = self.model(xs)
         loss_fd = F.cross_entropy(pred_sensitive, y)
         rho_penalty = self._rho_violation(X, xs_raw)
+        xs_norm = xs.flatten(1).norm(p=2, dim=1).mean()
         loss = float(self.options.get('fedfed_lambda_fd', 1.0)) * loss_fd
         loss = loss + float(self.options.get('fedfed_lambda_rho', 10.0)) * rho_penalty
         kl_loss = self.generator.last_kl
@@ -190,6 +192,12 @@ class FedFedImageClientPlugin(BaseClientPlugin):
             loss = loss + float(self.options.get('fedfed_beta_kl', 0.001)) * kl_loss
         loss.backward()
         self.optimizer.step()
+        self.last_distill_stats = {
+            'fd_loss': float(loss_fd.detach().item()),
+            'rho_penalty': float(rho_penalty.detach().item()),
+            'xs_norm': float(xs_norm.detach().item()),
+            'kl_loss': float(kl_loss.detach().item()) if kl_loss is not None else 0.0,
+        }
         return pred_sensitive, loss.detach()
 
     def collect_shared_batch(self, X, y):

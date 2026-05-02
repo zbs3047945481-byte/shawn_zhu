@@ -1,0 +1,79 @@
+<mxfile host="app.diagrams.net" modified="2026-05-02T00:00:00.000Z" agent="Codex" version="24.7.17">
+  <diagram id="fedfed-labelskew-largepool" name="FedFed Label-Skew Large-Pool Two-Stage">
+    <mxGraphModel dx="1500" dy="950" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="1000" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="title" value="FedFed 插件最新版机制：纯 Label Skew + 大共享池 + 两阶段训练" style="text;html=1;strokeColor=none;fillColor=none;fontSize=24;fontStyle=1;align=center;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="260" y="20" width="1080" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="data" value="实验数据设置&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;CIFAR-10 / Dirichlet label skew&lt;br&gt;alpha = 0.3 优先验证&lt;br&gt;enable_feature_skew = false&lt;br&gt;enable_quantity_skew = false&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E3F2FD;strokeColor=#1565C0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="95" width="250" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="server" value="Server / FedAvg Baseline&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;保留 FedAvg 主流程&lt;br&gt;插件只通过接口接入&lt;br&gt;聚合模型参数 + generator 参数&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#6A1B9A;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="675" y="95" width="270" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="client" value="Client k&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;本地私有数据 D_k&lt;br&gt;分类器 f(.; w_k)&lt;br&gt;生成器 q(.; theta_k)&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8F5E9;strokeColor=#2E7D32;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="360" y="95" width="250" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="stage1" value="阶段 1：Feature Distillation&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;fedfed_distill_rounds = 30&lt;br&gt;fedfed_distill_local_epoch = 2&lt;br&gt;每轮采样 c_fraction = 0.2&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF8E1;strokeColor=#F9A825;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="50" y="320" width="270" height="130" as="geometry"/>
+        </mxCell>
+        <mxCell id="split" value="特征分离 / 竞争机制&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;x_r = q(x)&lt;br&gt;x_s = clip(x - q(x))&lt;br&gt;目标：x_s 小但可分类&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E0F2F1;strokeColor=#00695C;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="380" y="310" width="285" height="150" as="geometry"/>
+        </mxCell>
+        <mxCell id="loss" value="蒸馏损失与可观测指标&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;L_distill = lambda_fd * CE(f(x_s), y)&lt;br&gt;+ lambda_rho * violation(||x_s||)&lt;br&gt;+ beta_kl * KL&lt;br&gt;日志新增：L_fd / Rho / xs_norm&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FCE4EC;strokeColor=#AD1457;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="725" y="300" width="360" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="agg" value="蒸馏阶段服务器聚合&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;聚合 w_k 得到全局分类器&lt;br&gt;聚合 theta_k 得到全局生成器&lt;br&gt;下一蒸馏轮广播 w, theta&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F3E5F5;strokeColor=#6A1B9A;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1160" y="315" width="300" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="collect" value="阶段 2：收集共享性能敏感特征&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;所有客户端生成 x_s&lt;br&gt;upload_per_class = 20&lt;br&gt;upload_per_client = 200&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#E8EAF6;strokeColor=#283593;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="180" y="555" width="330" height="140" as="geometry"/>
+        </mxCell>
+        <mxCell id="pool" value="Server Shared Feature Pool&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;按类别维护 FIFO 队列&lt;br&gt;shared_per_class_size = 400&lt;br&gt;shared_buffer_size = 4000&lt;br&gt;目标：更接近论文的全局共享数据集&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#EDE7F6;strokeColor=#4527A0;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="650" y="540" width="350" height="170" as="geometry"/>
+        </mxCell>
+        <mxCell id="stage3" value="阶段 3：正式 FedAvg 训练&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;formal_online_distill = false&lt;br&gt;本地原图训练 + 共享 x_s 辅助训练&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFF3E0;strokeColor=#EF6C00;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1125" y="550" width="330" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="formal_loss" value="正式训练目标&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;L = CE(f(x), y)&lt;br&gt;+ lambda_shared * CE(f(x_s_shared), y)&lt;br&gt;不再在线更新生成器&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFEBEE;strokeColor=#C62828;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="530" y="785" width="360" height="135" as="geometry"/>
+        </mxCell>
+        <mxCell id="goal" value="当前验证目标&lt;br&gt;&lt;font style=&quot;font-size: 13px;&quot;&gt;不追求所有场景碾压&lt;br&gt;先在 alpha=0.3 且 local_epoch=1 或 5&lt;br&gt;拿到显著优于 FedAvg 的结果&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#F1F8E9;strokeColor=#558B2F;fontSize=16;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="1045" y="780" width="380" height="145" as="geometry"/>
+        </mxCell>
+        <mxCell id="e1" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="data" target="client">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e2" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="client" target="server">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e3" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="stage1" target="split">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e4" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="split" target="loss">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e5" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="loss" target="agg">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e6" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="agg" target="collect">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e7" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="collect" target="pool">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e8" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="pool" target="stage3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e9" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="stage3" target="formal_loss">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="e10" style="endArrow=block;html=1;rounded=0;strokeWidth=2;strokeColor=#455A64;" edge="1" parent="1" source="formal_loss" target="goal">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
